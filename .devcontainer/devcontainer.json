@@ -1,0 +1,51 @@
+{
+	"name": "Python 3",
+	"image": "mcr.microsoft.com/devcontainers/python:1-3.12-bullseye",
+	"features": {
+		"ghcr.io/jsburckhardt/devcontainer-features/gitleaks:1": {},
+    	"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		"ghcr.io/devcontainers/features/common-utils:2": {
+				"upgradePackages": true,
+			"username": "automatic",
+			"userUid": "automatic",
+			"userGid": "automatic"
+		},
+		"ghcr.io/itsmechlark/features/postgresql:1": {
+			"version": "latest"
+		}
+	},
+	"remoteEnv": {
+    	"GRPC_VERBOSITY": "NONE",
+    	"PATH": "${containerWorkspaceFolder}/bin:${containerEnv:PATH}",
+		"CLOUDSDK_PYTHON_SITEPACKAGES": "1"
+  	},
+	"forwardPorts": [5432],
+	  "onCreateCommand": "chmod +x ${containerWorkspaceFolder}/bin/* || true",
+	  "postCreateCommand": "/bin/bash ${containerWorkspaceFolder}/bin/post_create_command.sh",
+	  "postStartCommand": "/bin/bash ${containerWorkspaceFolder}/bin/post_start_command.sh",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.vscode-pylance",
+				"ms-python.python",
+				"ms-python.debugpy",
+				"ms-python.black-formatter",
+				"ms-python.isort"
+			],
+			"settings": {
+				"[python]": {
+					"editor.defaultFormatter": "ms-python.black-formatter",
+					"editor.codeActionsOnSave": {
+						"source.organizeImports": "explicit"
+					},
+					"editor.formatOnSave": true
+				  },
+				"python.testing.pytestArgs": [
+					"tests"
+				],
+				"python.testing.unittestEnabled": false,
+				"python.testing.pytestEnabled": true
+			}
+		}
+	}
+}

@@ -1,0 +1,120 @@
+{
+  "models": {
+    "vertex_ai": {
+      "gemini-2.0-flash-lite-001@us-central1": {
+        "model_name": "gemini-2.0-flash-lite-001",
+        "temperature": 0.0,
+        "max_retries": 0,
+        "project": "research-su-llm-routing",
+        "location": "us-central1"
+      },
+      "gemini-2.0-flash-001@us-central1": {
+        "model_name": "gemini-2.0-flash-001",
+        "temperature": 0.0,
+        "max_retries": 0,
+        "project": "research-su-llm-routing",
+        "location": "us-central1"
+      },
+      "gemini-2.0-flash-lite@us-central1": {
+        "model_name": "gemini-2.0-flash-lite",
+        "temperature": 0.0,
+        "max_retries": 0,
+        "project": "research-su-llm-routing",
+        "location": "us-central1"
+      },
+      "gemini-2.0-flash@us-central1": {
+        "model_name": "gemini-2.0-flash",
+        "temperature": 0.0,
+        "max_retries": 0,
+        "project": "research-su-llm-routing",
+        "location": "us-central1"
+      },
+      "gemini-2.5-flash@us-central1": {
+        "model_name": "gemini-2.5-flash",
+        "temperature": 0.0,
+        "max_retries": 0,
+        "project": "research-su-llm-routing",
+        "location": "us-central1"
+      },
+      "gemini-2.5-pro@us-central1": {
+        "model_name": "gemini-2.5-pro",
+        "temperature": 0.0,
+        "max_retries": 0,
+        "project": "research-su-llm-routing",
+        "location": "us-central1"
+      }
+    },
+    "vertex_meta": {
+      "meta/llama-3.3-70b-instruct-maas@us-central1": {
+        "model": "meta/llama-3.3-70b-instruct-maas",
+        "temperature": 0.0,
+        "max_retries": 0,
+        "project": "research-su-llm-routing",
+        "location": "us-central1",
+        "append_tools_to_system_message": true
+      },
+      "meta/llama-4-maverick-17b-128e-instruct-maas@us-east5": {
+        "model": "meta/llama-4-maverick-17b-128e-instruct-maas",
+        "temperature": 0.0,
+        "max_retries": 0,
+        "project": "research-su-llm-routing",
+        "location": "us-east5",
+        "append_tools_to_system_message": true
+      },
+      "meta/llama-4-scout-17b-16e-instruct-maas@us-east5": {
+        "model": "meta/llama-4-scout-17b-16e-instruct-maas",
+        "temperature": 0.0,
+        "max_retries": 0,
+        "project": "research-su-llm-routing",
+        "location": "us-east5",
+        "append_tools_to_system_message": true
+      }
+    },
+    "vertex_anthropic": {
+      "claude-3-7-sonnet@20250219@europe-west1": {
+        "model": "claude-3-7-sonnet@20250219",
+        "temperature": 0.0,
+        "max_retries": 0,
+        "project": "research-su-llm-routing",
+        "location": "europe-west1"
+      },
+      "claude-sonnet-4@20250514@europe-west1": {
+        "model": "claude-sonnet-4@20250514",
+        "temperature": 0.0,
+        "max_retries": 0,
+        "project": "research-su-llm-routing",
+        "location": "europe-west1"
+      },
+      "claude-3-5-haiku@20241022@us-east5": {
+        "model": "claude-3-5-haiku@20241022",
+        "temperature": 0.0,
+        "max_retries": 0,
+        "project": "research-su-llm-routing",
+        "location": "us-east5"
+      },
+      "claude-opus-4@20250514@us-east5": {
+        "model": "claude-opus-4@20250514",
+        "temperature": 0.0,
+        "max_retries": 0,
+        "project": "research-su-llm-routing",
+        "location": "us-east5"
+      }
+    },
+    "vertex_mistral": {
+      "mistral-large-2411@us-central1": {
+        "model": "mistral-large-2411",
+        "temperature": 0.0,
+        "max_retries": 0,
+        "project": "research-su-llm-routing",
+        "location": "us-central1"
+      },
+      "mistral-small-2503@001@us-central1": {
+        "model": "mistral-small-2503@001",
+        "temperature": 0.0,
+        "max_retries": 0,
+        "project": "research-su-llm-routing",
+        "location": "us-central1"
+      }
+    }
+}
+}

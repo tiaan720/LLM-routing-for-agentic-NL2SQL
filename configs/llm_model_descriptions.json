@@ -1,0 +1,369 @@
+{
+  "gemini-2.0-flash-lite-001": {
+    "description": "gemini-2.0-flash-lite-001 is a lightweight language model optimized for high-speed, low-cost text generation tasks. It is designed for chat-completion and general-purpose conversational AI, offering efficient performance with moderate reasoning capabilities. The model is suitable for scenarios where fast response and affordability are prioritized over advanced reasoning or complex task handling.",
+    "intelligence_rating": "Medium",
+    "speed_rating": "High",
+    "cost_rating": "Affordable",
+    "type": "chat-completion",
+    "strengths": [
+      "Low latency responses",
+      "Cost-effective operation",
+      "Multi-turn conversational ability",
+      "Good factual recall for common topics"
+    ],
+    "use_cases": [
+      "Customer support chatbots",
+      "FAQ automation",
+      "Lightweight virtual assistants",
+      "Simple content generation",
+      "Real-time messaging applications"
+    ],
+    "notes": "Model is best suited for applications requiring fast, inexpensive responses with moderate reasoning needs. It may not perform as well on complex reasoning, nuanced tasks, or advanced code generation. Limited context window and smaller parameter size compared to flagship models. Ideal for high-throughput, cost-sensitive deployments."
+  },
+  "gemini-2.0-flash-001": {
+    "description": "gemini-2.0-flash-001 is a lightweight, high-speed language model optimized for rapid text generation and chat-based interactions. It is designed to deliver fast responses with reasonable accuracy, making it suitable for latency-sensitive applications where throughput is a priority over advanced reasoning.",
+    "intelligence_rating": "Medium",
+    "speed_rating": "High",
+    "cost_rating": "Affordable",
+    "type": "chat-completion",
+    "strengths": [
+      "Low latency responses",
+      "Efficient multi-turn chat handling",
+      "Good factual recall for common topics",
+      "Scalable for high-throughput applications"
+    ],
+    "use_cases": [
+      "Customer support chatbots",
+      "Real-time virtual assistants",
+      "FAQ automation",
+      "Simple content generation",
+      "Interactive user interfaces"
+    ],
+    "notes": "Model prioritizes speed and cost-efficiency over complex reasoning or nuanced understanding. May underperform on tasks requiring deep analysis, creativity, or advanced code generation. Suitable for production environments with high concurrency and cost constraints. Not optimized for multi-modal inputs or highly technical domains."
+  },
+  "gemini-2.0-flash-lite": {
+    "description": "gemini-2.0-flash-lite is a lightweight language model optimized for fast, cost-effective text generation and chat-completion tasks. It is designed to deliver rapid responses with reasonable accuracy, making it suitable for high-throughput applications where latency and cost are critical factors. The model prioritizes speed and efficiency over advanced reasoning capabilities.",
+    "intelligence_rating": "Medium",
+    "speed_rating": "High",
+    "cost_rating": "Affordable",
+    "type": "chat-completion",
+    "strengths": [
+      "Low latency responses",
+      "High throughput",
+      "Cost-effective operation",
+      "Handles basic multi-turn chat",
+      "Efficient for large-scale deployments"
+    ],
+    "use_cases": [
+      "Customer support chatbots",
+      "Real-time virtual assistants",
+      "FAQ automation",
+      "Simple content generation",
+      "High-volume messaging platforms"
+    ],
+    "notes": "The model is best suited for scenarios where speed and cost are prioritized over complex reasoning or deep factual accuracy. It may not perform as well on tasks requiring nuanced understanding or advanced problem-solving. Limited in handling highly technical or creative tasks compared to larger models."
+  },
+  "gemini-2.0-flash": {
+    "description": "Gemini-2.0-Flash is a lightweight, high-speed language model optimized for rapid inference and low-cost deployment. It is designed for chat-completion and general-purpose text generation tasks, offering efficient performance with reasonable reasoning capabilities. The model is suitable for scenarios where response speed and cost are prioritized over advanced reasoning depth.",
+    "intelligence_rating": "Medium",
+    "speed_rating": "High",
+    "cost_rating": "Affordable",
+    "type": "chat-completion",
+    "strengths": [
+      "Fast response times",
+      "Low operational cost",
+      "Multi-turn conversation handling",
+      "Good factual accuracy for common queries"
+    ],
+    "use_cases": [
+      "Customer support chatbots",
+      "Real-time virtual assistants",
+      "FAQ automation",
+      "Lightweight content generation",
+      "Simple tutoring applications"
+    ],
+    "notes": "Gemini-2.0-Flash is best suited for applications requiring high throughput and low latency. It may not match larger models in complex reasoning or nuanced tasks. Limited in-depth knowledge and advanced problem-solving compared to flagship models. Supports scalable deployment due to low compute requirements."
+  },
+  "gemini-2.5-flash": {
+    "description": "Gemini-2.5-Flash is a lightweight, high-speed language model optimized for rapid inference and cost-effective deployment. It is designed for chat-completion and general-purpose conversational tasks, offering strong performance on multi-turn dialogue and basic reasoning while prioritizing efficiency over advanced capabilities.",
+    "intelligence_rating": "Medium",
+    "speed_rating": "High",
+    "cost_rating": "Affordable",
+    "type": "chat-completion",
+    "strengths": [
+      "Fast response times",
+      "Low operational cost",
+      "Effective multi-turn conversation",
+      "Good factual accuracy on common topics"
+    ],
+    "use_cases": [
+      "Customer support chatbots",
+      "Real-time virtual assistants",
+      "FAQ automation",
+      "Lightweight tutoring",
+      "Content drafting"
+    ],
+    "notes": "Gemini-2.5-Flash is best suited for scenarios where speed and cost are prioritized over advanced reasoning or complex task performance. It may not match larger models in nuanced reasoning, creative generation, or specialized domain expertise. Supports high-throughput applications and is suitable for large-scale deployments."
+  },
+  "gemini-2.5-flash-preview-05-20": {
+    "description": "gemini-2.5-flash-preview-05-20 is a fast, lightweight language model optimized for high-throughput chat and completion tasks. It offers efficient performance with reasonable reasoning capabilities, making it suitable for applications where speed and cost are priorities over advanced reasoning or creativity.",
+    "intelligence_rating": "Medium",
+    "speed_rating": "High",
+    "cost_rating": "Affordable",
+    "type": "chat-completion",
+    "strengths": [
+      "Low latency responses",
+      "Efficient token throughput",
+      "Consistent multi-turn chat",
+      "Good factual accuracy",
+      "Scalable for high-volume use"
+    ],
+    "use_cases": [
+      "Customer support chatbots",
+      "Real-time virtual assistants",
+      "FAQ automation",
+      "Content summarization",
+      "Internal productivity tools"
+    ],
+    "notes": "Model is designed for speed and cost-efficiency, with some trade-offs in complex reasoning and nuanced generation compared to larger models. Not optimized for advanced code generation or highly creative tasks. Suitable for production environments requiring scalable, responsive LLM deployments."
+  },
+  "gemini-2.5-pro": {
+    "description": "Gemini-2.5-pro is a large language model designed for advanced conversational and reasoning tasks. It supports multi-turn dialogue, demonstrates strong contextual understanding, and can process both text and images, making it suitable for multi-modal applications. The model is optimized for high factual accuracy and robust code generation.",
+    "intelligence_rating": "High",
+    "speed_rating": "Medium",
+    "cost_rating": "Moderate",
+    "type": "multi-modal",
+    "strengths": [
+      "advanced reasoning",
+      "multi-turn conversation",
+      "factual accuracy",
+      "code generation",
+      "multi-modal input support"
+    ],
+    "use_cases": [
+      "customer support",
+      "educational tutoring",
+      "code review and generation",
+      "content creation",
+      "data analysis assistance"
+    ],
+    "notes": "Supports both text and image inputs. May require significant compute resources for deployment. Output cost is notably higher than input, impacting overall cost for large outputs. Performance may vary depending on input complexity and modality. Not suitable for real-time applications with strict latency requirements."
+  },
+  "gemini-2.5-pro-preview-05-06": {
+    "description": "Gemini 2.5 Pro Preview is a large language model designed for advanced natural language understanding and generation tasks. It demonstrates strong reasoning, multi-turn conversation handling, and supports complex instructions. The model is optimized for general-purpose chat, content creation, and information retrieval.",
+    "intelligence_rating": "High",
+    "speed_rating": "Medium",
+    "cost_rating": "Moderate",
+    "type": "chat-completion",
+    "strengths": [
+      "advanced reasoning",
+      "multi-turn conversation",
+      "factual accuracy",
+      "instruction following",
+      "context retention"
+    ],
+    "use_cases": [
+      "customer support",
+      "tutoring and education",
+      "content generation",
+      "information retrieval",
+      "brainstorming"
+    ],
+    "notes": "Model is in preview and may have evolving performance characteristics. Not optimized for code generation or highly specialized technical domains. Throughput and latency are suitable for most interactive applications but may be slower than smaller models. Supports large context windows and robust handling of ambiguous queries."
+  },
+  "gemini-2.5-pro-preview-03-25": {
+    "description": "Gemini-2.5-pro-preview-03-25 is a large language model designed for advanced conversational and reasoning tasks. It supports multi-turn dialogue, demonstrates strong contextual understanding, and can handle a variety of text-based tasks with high accuracy. The model is optimized for both general-purpose and specialized applications, including code and factual queries.",
+    "intelligence_rating": "High",
+    "speed_rating": "Medium",
+    "cost_rating": "Moderate",
+    "type": "chat-completion",
+    "strengths": [
+      "advanced reasoning",
+      "multi-turn conversation",
+      "factual accuracy",
+      "code generation",
+      "context retention"
+    ],
+    "use_cases": [
+      "customer support",
+      "tutoring and education",
+      "code review and generation",
+      "content drafting",
+      "research assistance"
+    ],
+    "notes": "Supports large context windows and complex instructions. May exhibit occasional factual inaccuracies or hallucinations, especially on niche topics. Response speed is generally acceptable but may vary with load and prompt complexity. Preview status may indicate evolving performance or feature set."
+  },
+  "meta/llama-3.3-70b-instruct-maas": {
+    "description": "Llama-3.3-70B-Instruct is a large language model designed for instruction-following tasks, offering strong performance in natural language understanding, reasoning, and code generation. It is optimized for multi-turn conversations and can be deployed locally, providing flexibility and data privacy.",
+    "intelligence_rating": "High",
+    "speed_rating": "Medium",
+    "cost_rating": "Affordable",
+    "type": "chat-completion",
+    "strengths": [
+      "advanced reasoning",
+      "multi-turn conversation handling",
+      "factual accuracy",
+      "code generation",
+      "context retention"
+    ],
+    "use_cases": [
+      "customer support automation",
+      "technical tutoring",
+      "code review and generation",
+      "knowledge base querying",
+      "content drafting"
+    ],
+    "notes": "Requires significant computational resources for optimal performance. Inference speed may vary based on hardware. Not inherently multi-modal; text-only input/output. Local deployment enables data privacy and customization. Model size may limit use on resource-constrained devices."
+  },
+  "meta/llama-4-maverick-17b-128e-instruct-maas": {
+    "description": "The meta/llama-4-maverick-17b-128e-instruct-maas model is a 17-billion parameter instruction-tuned language model designed for chat-completion and general-purpose reasoning tasks. It offers strong multi-turn conversational abilities, reliable factual recall, and competent code generation, making it suitable for a range of enterprise and research applications. The model balances advanced reasoning with efficient inference and cost-effective operation.",
+    "intelligence_rating": "High",
+    "speed_rating": "Medium",
+    "cost_rating": "Affordable",
+    "type": "chat-completion",
+    "strengths": [
+      "advanced reasoning",
+      "multi-turn conversation",
+      "factual accuracy",
+      "code generation",
+      "instruction following"
+    ],
+    "use_cases": [
+      "customer support",
+      "virtual assistants",
+      "code review",
+      "content generation",
+      "tutoring"
+    ],
+    "notes": "Model size (17B parameters) provides strong performance but may require substantial memory for on-premise deployment. Not multi-modal; text-only input and output. May exhibit occasional factual inaccuracies or hallucinations, especially on niche topics. Supports tool use via system message configuration."
+  },
+  "claude-3-7-sonnet@20250219": {
+    "description": "claude-3-7-sonnet@20250219 is a large language model optimized for chat-completion and general-purpose reasoning tasks. It demonstrates strong performance in multi-turn dialogue, contextual understanding, and code-related queries, with a balance between capability and computational efficiency.",
+    "intelligence_rating": "High",
+    "speed_rating": "Medium",
+    "cost_rating": "Moderate",
+    "type": "chat-completion",
+    "strengths": [
+      "advanced reasoning",
+      "multi-turn conversation handling",
+      "factual accuracy",
+      "code generation and review",
+      "context retention"
+    ],
+    "use_cases": [
+      "customer support automation",
+      "technical tutoring",
+      "code review and assistance",
+      "content drafting",
+      "knowledge base querying"
+    ],
+    "notes": "Model offers strong general-purpose performance but may have slower response times compared to smaller models. Cost is moderate for large-scale deployments. Does not support multi-modal input. Output quality depends on prompt clarity and complexity."
+  },
+  "claude-sonnet-4@20250514": {
+    "description": "claude-sonnet-4@20250514 is a large language model designed for advanced conversational AI tasks, offering strong reasoning, multi-turn dialogue, and code understanding. It is optimized for chat-based applications and demonstrates high factual accuracy and contextual awareness.",
+    "intelligence_rating": "High",
+    "speed_rating": "Medium",
+    "cost_rating": "Moderate",
+    "type": "chat-completion",
+    "strengths": [
+      "advanced reasoning",
+      "multi-turn conversation",
+      "factual accuracy",
+      "code understanding",
+      "context retention"
+    ],
+    "use_cases": [
+      "customer support",
+      "technical tutoring",
+      "code review and assistance",
+      "content generation",
+      "knowledge base querying"
+    ],
+    "notes": "Model may have slower response times compared to smaller models due to its size. Cost is moderate for large-scale deployments. Does not support multi-modal input. Requires careful prompt engineering for optimal results. Outputs should be reviewed for sensitive or critical applications."
+  },
+  "claude-3-5-haiku@20241022": {
+    "description": "claude-3-5-haiku@20241022 is a lightweight language model optimized for high-speed, low-latency text generation. It offers solid reasoning and conversational abilities while maintaining efficient resource usage, making it suitable for applications requiring rapid responses and moderate complexity. The model is designed primarily for chat-completion and general-purpose text tasks.",
+    "intelligence_rating": "Medium",
+    "speed_rating": "High",
+    "cost_rating": "Moderate",
+    "type": "chat-completion",
+    "strengths": [
+      "Fast response times",
+      "Low resource consumption",
+      "Consistent multi-turn conversation",
+      "Good factual accuracy for common topics"
+    ],
+    "use_cases": [
+      "Customer support chatbots",
+      "Real-time virtual assistants",
+      "FAQ automation",
+      "Lightweight content generation"
+    ],
+    "notes": "Best suited for scenarios where speed and efficiency are prioritized over advanced reasoning. May not perform as well as larger models on complex problem-solving or nuanced tasks. Lacks multi-modal capabilities. Cost is moderate compared to larger, more capable models."
+  },
+  "claude-opus-4@20250514": {
+    "description": "claude-opus-4@20250514 is a large language model designed for advanced natural language understanding and generation. It excels at complex reasoning, multi-turn conversations, and producing coherent, contextually accurate responses. The model demonstrates strong performance in code generation, factual accuracy, and nuanced language tasks.",
+    "intelligence_rating": "High",
+    "speed_rating": "Medium",
+    "cost_rating": "Expensive",
+    "type": "chat-completion",
+    "strengths": [
+      "advanced reasoning",
+      "multi-turn conversation handling",
+      "factual accuracy",
+      "code generation",
+      "context retention"
+    ],
+    "use_cases": [
+      "technical support",
+      "tutoring and education",
+      "code review and generation",
+      "content creation",
+      "research assistance"
+    ],
+    "notes": "The model's high cost per token may limit its use in large-scale or cost-sensitive applications. Inference speed is moderate, which may impact real-time deployment scenarios. It is optimized for text-based tasks and does not support multi-modal inputs. Careful prompt engineering may be required to achieve optimal results in specialized domains."
+  },
+  "mistral-large-2411": {
+    "description": "Mistral Large 2411 is a high-capacity language model designed for advanced natural language understanding and generation tasks. It demonstrates strong performance in reasoning, multi-turn dialogue, and code-related tasks, with a focus on factual accuracy and coherent output. The model is optimized for chat-completion and general-purpose language applications.",
+    "intelligence_rating": "High",
+    "speed_rating": "High",
+    "cost_rating": "Moderate",
+    "type": "chat-completion",
+    "strengths": [
+      "advanced reasoning",
+      "multi-turn conversation handling",
+      "factual accuracy",
+      "code generation and understanding",
+      "context retention"
+    ],
+    "use_cases": [
+      "customer support automation",
+      "technical tutoring",
+      "code review and assistance",
+      "content generation",
+      "knowledge base querying"
+    ],
+    "notes": "The model offers strong performance on a range of language tasks but may still exhibit occasional factual inaccuracies or hallucinations. It is not multi-modal and is limited to text-based input and output. Deployment requires consideration of API rate limits and token costs, especially for high-volume applications."
+  },
+  "mistral-small-2503@001": {
+    "description": "Mistral-small-2503@001 is a compact language model optimized for chat-completion and general-purpose text generation tasks. It offers a balance between performance and efficiency, delivering coherent multi-turn conversations and reliable factual outputs. The model is designed for fast inference and cost-effective deployment in production environments.",
+    "intelligence_rating": "Medium",
+    "speed_rating": "High",
+    "cost_rating": "Affordable",
+    "type": "chat-completion",
+    "strengths": [
+      "Efficient multi-turn conversation handling",
+      "Consistent factual accuracy",
+      "Low inference latency",
+      "Resource-efficient deployment"
+    ],
+    "use_cases": [
+      "Customer support chatbots",
+      "Virtual assistants",
+      "Content drafting",
+      "FAQ automation",
+      "Internal productivity tools"
+    ],
+    "notes": "Model size is suitable for latency-sensitive applications. May have limitations with highly complex reasoning or specialized domain knowledge compared to larger models. Supports standard text input and output; not multi-modal. Cost structure is favorable for large-scale deployments."
+  }
+}

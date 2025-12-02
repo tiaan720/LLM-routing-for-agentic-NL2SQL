@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Get the repository root directory
+REPO_ROOT=$(git rev-parse --show-toplevel)
+
+# Check if we're on Windows (Git Bash/MSYS)
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+    # Windows: use Scripts instead of bin
+    VENV_PATH="$REPO_ROOT/.venv"
+    ACTIVATE_SCRIPT="$VENV_PATH/Scripts/activate"
+    PYTHON_BIN="$VENV_PATH/Scripts/python.exe"
+    ISORT_BIN="$VENV_PATH/Scripts/isort.exe"
+    BLACK_BIN="$VENV_PATH/Scripts/black.exe"
+else
+    # Linux/Mac
+    VENV_PATH="$REPO_ROOT/.venv"
+    ACTIVATE_SCRIPT="$VENV_PATH/bin/activate"
+    PYTHON_BIN="$VENV_PATH/bin/python"
+    ISORT_BIN="$VENV_PATH/bin/isort"
+    BLACK_BIN="$VENV_PATH/bin/black"
+fi
+
+if [ ! -f "$ACTIVATE_SCRIPT" ]; then
+    echo "Virtual environment not found at $VENV_PATH"
+    echo "Looking for activation script at: $ACTIVATE_SCRIPT"
+    exit 1
+fi
+
+# Activate the virtual environment
+source "$ACTIVATE_SCRIPT"
+
+# GitLeaks
+ignoregitleaks=$(git config --type=bool hooks.ignoregitleaks)
+
+if [ "$ignoregitleaks" != "true" ]; then
+    if ! command -v gitleaks &> /dev/null; then
+        echo "Gitleaks is not installed. Please install it and try again."
+        exit 1
+    fi
+    gitleaks protect --staged
+fi
+
+# Format all staged Python files using black and isort
+
+# Fetch all staged Python files
+files=$(git diff --cached --name-only --diff-filter=d | grep -E '\.py$')
+
+if [ -n "$files" ]; then
+    echo "Running isort..."
+    "$ISORT_BIN" $files || {
+        echo "isort failed, aborting commit."
+        exit 1
+    }
+
+    echo "Running black..."
+    "$BLACK_BIN" $files || {
+        echo "black failed, aborting commit."
+        exit 1
+    }
+
+    # Add reformatted files to the commit
+    git add $files
+
+    echo "All Python files are formatted and linted with isort and black."
+else
+    echo "No Python files to format."
+fi

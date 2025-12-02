@@ -1,0 +1,31 @@
+.venv
+__pycache__
+.env
+.pytest_cache
+
+plots/
+
+mlflow.db
+mlflow.db-journal
+mlruns/
+qdrant_db
+
+# Qdrant storage
+qdrant_data/
+data/*
+!data/chatbor_arena_processed.csv
+!data/database_data/
+!data/llm_examples/examples.json
+!data/arena_hard_results.csv
+router_models/
+src/models/llm_model_config.json
+configs/llm_model_config copy.json
+# configs/llm_model_descriptions.json
+src/models/llm_model_config copy.json
+experiments/test_sets/lmsys-chatbot-arena/*
+experiments/test_sets/lmsys-wsdm-cup/*
+mcp/.langgraph_api
+.langgraph_api
+output/*
+
+.DS_store

@@ -1,0 +1,2186 @@
+[
+  {
+    "question": "Which authors have written publications in both the domain \"Machine Learning\" and the domain \"Data Science\"?",
+    "query": "SELECT author.name, author.aid FROM author WHERE author.aid IN (SELECT domain_author.aid FROM domain_author WHERE domain_author.did IN (SELECT domain.did FROM DOMAIN WHERE domain.name IN ('Machine Learning', 'Data Science') ) GROUP BY 1 HAVING COUNT(DISTINCT domain_author.did) = 2)",
+    "answer": "Ashish Vaswani, 2",
+    "dataset": "academic",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of citations received by each author?",
+    "query": "SELECT author.name, author.aid, sum(publication.citation_num) AS total_citations FROM author JOIN writes ON author.aid = writes.aid JOIN publication ON writes.pid = publication.pid GROUP BY author.name, author.aid ORDER BY total_citations DESC NULLS LAST",
+    "answer": "Larry Summers, 1, 6; Ashish Vaswani, 2, 3; Noam Shazeer, 3, 0",
+    "dataset": "academic",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of publications published in each year?",
+    "query": "SELECT publication.year, COUNT(DISTINCT publication.pid) AS total_publications FROM publication GROUP BY publication.year ORDER BY publication.year;",
+    "answer": "2020, 2; 2021, 3",
+    "dataset": "academic",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the average number of references cited by publications in each domain name?",
+    "query": "SELECT domain.name, domain.did, AVG(publication.reference_num) AS average_references FROM domain_publication JOIN publication ON domain_publication.pid = publication.pid JOIN domain ON domain.did = domain_publication.did GROUP BY domain.name, domain.did",
+    "answer": "Data Science, 1, 2.0000000000000000; Computer Science, 3, 3.0000000000000000; Sociology, 4, 0E-20; Machine Learning, 5, 4.0000000000000000; Natural Sciences, 2, 1.00000000000000000000",
+    "dataset": "academic",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the average number of citations received by publications in each year?",
+    "query": "SELECT publication.year, AVG(publication.citation_num) AS average_citations FROM publication GROUP BY publication.year ORDER BY publication.year NULLS LAST;",
+    "answer": "2020, 3.0000000000000000; 2021, 1.00000000000000000000",
+    "dataset": "academic",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the title of the publication that has received the highest number of citations?",
+    "query": "SELECT publication.title FROM publication ORDER BY publication.citation_num DESC NULLS LAST LIMIT 1;",
+    "answer": "The Effects of Climate Change on Agriculture",
+    "dataset": "academic",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What are the top 5 domains with the highest number of authors associated with them?",
+    "query": "SELECT d.name, d.did, COUNT(DISTINCT a.aid) AS author_count FROM author a JOIN domain_author da ON a.aid = da.aid JOIN domain d ON da.did = d.did GROUP BY d.name, d.did ORDER BY author_count DESC LIMIT 5",
+    "answer": "Computer Science, 3, 3; Machine Learning, 5, 2; Data Science, 1, 1; Natural Sciences, 2, 1; Sociology, 4, 1",
+    "dataset": "academic",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What are the top 3 titles of the publications that have the highest number of references cited, ordered by the number of references cited in descending order?",
+    "query": "SELECT publication.title FROM publication ORDER BY publication.reference_num DESC LIMIT 3;",
+    "answer": "Attention is all you need; Data Mining Techniques; Optimizing GPU Throughput",
+    "dataset": "academic",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What are the top 3 publications with the highest number of citations?",
+    "query": "SELECT publication.title, publication.pid, publication.citation_num FROM publication ORDER BY publication.citation_num DESC LIMIT 3",
+    "answer": "The Effects of Climate Change on Agriculture, 1, 4; A Study on the Effects of Social Media on Mental Health, 2, 2; Data Mining Techniques, 3, 2",
+    "dataset": "academic",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What are the titles of all publications ordered alphabetically?",
+    "query": "SELECT DISTINCT publication.title FROM publication ORDER BY publication.title ASC NULLS LAST;",
+    "answer": "A Study on the Effects of Social Media on Mental Health; Attention is all you need; Data Mining Techniques; Optimizing GPU Throughput; The Effects of Climate Change on Agriculture",
+    "dataset": "academic",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of publications to authors in the database?",
+    "query": "SELECT CAST(COUNT(DISTINCT publication.pid) AS FLOAT) / NULLIF(COUNT(DISTINCT author.aid), 0) AS publication_to_author_ratio FROM publication, author;",
+    "answer": "1.0",
+    "dataset": "academic",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of publications presented in conferences to publications published in journals?",
+    "query": "SELECT CAST(COUNT(DISTINCT CASE WHEN cid IS NOT NULL THEN pid END) AS FLOAT) / NULLIF(COUNT(DISTINCT CASE WHEN jid IS NOT NULL THEN pid END), 0) AS ratio FROM publication;",
+    "answer": "1.0",
+    "dataset": "academic",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of the total number of publications to the total number of keywords within each domain ID? Show all domain IDs.",
+    "query": "SELECT domain_publication.did, CAST(COUNT(DISTINCT domain_publication.pid) AS FLOAT) / NULLIF(COUNT(DISTINCT domain_keyword.kid), 0) AS publication_to_keyword_ratio FROM domain_publication LEFT JOIN domain_keyword ON domain_publication.did = domain_keyword.did GROUP BY domain_publication.did ORDER BY publication_to_keyword_ratio DESC NULLS LAST;SELECT domain_publication.did, CAST(COUNT(DISTINCT domain_publication.pid) AS FLOAT) / NULLIF(COUNT(DISTINCT domain_keyword.kid), 0) AS publication_to_keyword_ratio FROM domain_keyword LEFT JOIN domain_publication ON domain_publication.did = domain_keyword.did GROUP BY domain_publication.did ORDER BY publication_to_keyword_ratio DESC NULLS LAST;SELECT d.did, COALESCE(CAST(COUNT(DISTINCT dp.pid) AS FLOAT) / NULLIF(COUNT(DISTINCT dk.kid), 0), 0) AS publication_to_keyword_ratio FROM domain d LEFT JOIN domain_publication dp ON d.did = dp.did LEFT JOIN domain_keyword dk ON d.did = dk.did GROUP BY d.did ORDER BY publication_to_keyword_ratio DESC NULLS LAST;",
+    "answer": "1, 1.0; 2, 1.0; 3, 0.0; 4, 0.0; 5, 0.0",
+    "dataset": "academic",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "How does the ratio of publications to journals change over the years? Return the annual numbers of publications and journals as well.",
+    "query": "SELECT publication.year, COUNT(DISTINCT publication.pid) AS num_publications, COUNT(DISTINCT publication.jid) AS num_journals, CAST(COUNT(DISTINCT publication.pid) AS FLOAT) / NULLIF(COUNT(DISTINCT publication.jid), 0) AS ratio FROM publication GROUP BY publication.year ORDER BY publication.year;",
+    "answer": "2020, 2, 2, 1.0; 2021, 3, 2, 1.5",
+    "dataset": "academic",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "How does the ratio of authors to organizations differ by continent?",
+    "query": "SELECT organization.continent, COUNT(DISTINCT author.aid)::float / NULLIF(COUNT(DISTINCT organization.oid), 0) AS ratio FROM organization LEFT JOIN author ON author.oid = organization.oid GROUP BY organization.continent ORDER BY ratio DESC NULLS LAST;WITH author_counts AS (SELECT o.continent, COUNT(DISTINCT a.aid) AS author_count FROM author AS a JOIN organization AS o ON a.oid = o.oid GROUP BY o.continent), organization_counts AS (SELECT o.continent, COUNT(DISTINCT o.oid) AS organization_count FROM organization AS o GROUP BY o.continent) SELECT ac.continent, CAST(ac.author_count AS FLOAT) / NULLIF(oc.organization_count, 0) AS author_to_organization_ratio FROM author_counts AS ac JOIN organization_counts AS oc ON ac.continent = oc.continent ORDER BY author_to_organization_ratio DESC;",
+    "answer": "North America, 1.5; Europe, 0.5",
+    "dataset": "academic",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "Which author had the most publications in the year 2021 and how many publications did he/she have that year?",
+    "query": "SELECT author.name, author.aid, COUNT(publication.pid) AS publication_count FROM writes JOIN author ON writes.aid = author.aid JOIN publication ON writes.pid = publication.pid WHERE publication.year = 2021 GROUP BY author.name, author.aid ORDER BY publication_count DESC NULLS LAST LIMIT 1",
+    "answer": "Ashish Vaswani, 2, 3",
+    "dataset": "academic",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of publications presented in each conference?",
+    "query": "SELECT conference.name, conference.cid, COUNT(publication.pid) AS total_publications FROM publication JOIN conference ON publication.cid = conference.cid GROUP BY conference.name, conference.cid ORDER BY total_publications DESC",
+    "answer": "ICML, 3, 3; AAAS, 2, 1; ISA, 1, 1",
+    "dataset": "academic",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of publications in each journal, ordered by the number of publications in descending order?",
+    "query": "SELECT journal.name, journal.jid, COUNT(publication.pid) AS total_publications FROM publication JOIN journal ON publication.jid=journal.jid GROUP BY journal.name, journal.jid ORDER BY total_publications DESC NULLS LAST",
+    "answer": "Nature, 2, 3; Journal of Machine Learning Research, 4, 1; Journal of Artificial Intelligence Research, 1, 1",
+    "dataset": "academic",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "How many publications were presented at each conference, ordered by the number of publications in descending order? Give the names of the conferences and their corresponding number of publications.",
+    "query": "SELECT conference.name, COUNT(publication.pid) AS num_publications FROM publication JOIN conference ON publication.cid=conference.cid GROUP BY conference.name, conference.cid ORDER BY num_publications DESC NULLS LAST;",
+    "answer": "ICML, 3; AAAS, 1; ISA, 1",
+    "dataset": "academic",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "How many publications were published in journals whose names start with the letter \"J\"?",
+    "query": "SELECT count(DISTINCT publication.pid) FROM publication JOIN journal ON publication.jid = journal.jid WHERE journal.name ilike 'J%';",
+    "answer": "2",
+    "dataset": "academic",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "Which organizations have authors who have written publications in the domain \"Machine Learning\"?",
+    "query": "SELECT DISTINCT organization.name, organization.oid FROM organization JOIN author ON organization.oid = author.oid JOIN writes ON author.aid = writes.aid JOIN domain_publication ON writes.pid = domain_publication.pid JOIN domain ON domain_publication.did = domain.did WHERE domain.name = 'Machine Learning'",
+    "answer": "Organization 3, 3",
+    "dataset": "academic",
+    "category": "instruct",
+    "instructions": "Always filter names using an exact match"
+  },
+  {
+    "question": "Which authors belong to the same domain as Martin?",
+    "query": "SELECT DISTINCT a2.name, a2.aid FROM author a1 JOIN domain_author da1 ON a1.aid = da1.aid JOIN domain_author da2 ON da1.did = da2.did JOIN author a2 ON da2.aid = a2.aid WHERE LOWER(a1.name) ILIKE '%martin%'",
+    "answer": "Noam Shazeer, 3; Martin Odersky, 4; Ashish Vaswani, 2",
+    "dataset": "academic",
+    "category": "instruct",
+    "instructions": "Always filter names using ILIKE with percent sign wildcards"
+  },
+  {
+    "question": "Which authors are not part of any organization?",
+    "query": "SELECT DISTINCT name, aid FROM author WHERE oid IS NULL",
+    "answer": "Kempinski, 5",
+    "dataset": "academic",
+    "category": "instruct",
+    "instructions": "Always filter names using ILIKE"
+  },
+  {
+    "question": "What are the publications written by authors from the 'Sociology' domain and presented at conferences in the year 2020?",
+    "query": "SELECT DISTINCT publication.title, publication.pid FROM DOMAIN JOIN domain_author ON domain.did = domain_author.did JOIN writes ON domain_author.aid = writes.aid JOIN publication ON writes.pid = publication.pid JOIN domain_conference ON domain.did = domain_conference.did WHERE domain.name ILIKE '%Sociology%' AND publication.year = 2020 AND publication.cid = domain_conference.cid",
+    "answer": "A Study on the Effects of Social Media on Mental Health, 2",
+    "dataset": "academic",
+    "category": "instruct",
+    "instructions": "To get publications written by authors from a given domain, you would need to join domain, domain_author, author to link the domain to the author first, and then join with write to link with the publication id. Finally, to see which ones were presented at conferences, you must join the domain table with the domain_conference table. You must also filter names using ILIKE."
+  },
+  {
+    "question": "What are the names of the authors who have written publications in the domain \"Computer Science\"?",
+    "query": "SELECT DISTINCT author.name FROM author JOIN writes ON author.aid = writes.aid JOIN publication ON writes.pid = publication.pid JOIN domain_publication ON publication.pid = domain_publication.pid JOIN domain ON domain_publication.did = domain.did WHERE domain.name ilike '%computer%science%';",
+    "answer": "Ashish Vaswani; Noam Shazeer",
+    "dataset": "academic",
+    "category": "instruct",
+    "instructions": "To get publications written by authors from a given domain, you would need to join domain, domain_author, author to link the domain to the author first, and then join with write to link with the publication id. You must also filter names using ILIKE."
+  },
+  {
+    "question": "What month were most students admitted? Return the no. of students and the month as a date",
+    "query": "SELECT date_trunc('month', s.admit_term) AS month, COUNT(*) AS total_students FROM student s GROUP BY MONTH ORDER BY total_students DESC LIMIT 1;SELECT TO_CHAR(DATE_TRUNC('month', s.admit_term), 'YYYY-MM') AS month, COUNT(*) AS total_students FROM student s GROUP BY month ORDER BY total_students DESC LIMIT 1;SELECT date_trunc('month', admit_term)::date AS MONTH, COUNT(*) AS num_students FROM student GROUP BY MONTH ORDER BY COUNT(*) DESC LIMIT 1;",
+    "answer": "2018-01-01, 2",
+    "dataset": "advising",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "What's the average predicted time to graduation since admission in no. of days?",
+    "query": "SELECT avg(predicted_graduation_semester - admit_term) AS average_predicted_time_to_graduation FROM student;",
+    "answer": "1460.0000000000000000",
+    "dataset": "advising",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "How many students were predicted to graduate in the last 10 years?",
+    "query": "SELECT count(*) AS num_students_graduated FROM student WHERE predicted_graduation_semester >= DATE_TRUNC('year', CURRENT_DATE) - interval '10 year';",
+    "answer": "4",
+    "dataset": "advising",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "How long has it been in days since the last admitted student? Give the answer as an integer.",
+    "query": "SELECT CURRENT_DATE - max(admit_term) AS duration_since_last_admitted_student FROM student;",
+    "answer": "2376",
+    "dataset": "advising",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "Return the course id's that are offered in either semesters 1 or 2 and ends before 1pm and had an instructor on thursday",
+    "query": "SELECT DISTINCT co.course_id FROM course_offering co JOIN offering_instructor oi ON co.offering_id = oi.offering_id WHERE (co.semester = 1 OR co.semester = 2) AND co.end_time < '13:00:00' AND co.thursday IS NOT NULL;",
+    "answer": "1; 3",
+    "dataset": "advising",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of students who found the instructor to be hilarious per course id?",
+    "query": "SELECT course_tags_count.course_id, SUM(course_tags_count.hilarious) AS total_hilarious FROM course_tags_count GROUP BY course_tags_count.course_id;",
+    "answer": "3, 1; 4, 1; 2, 2; 1, 3",
+    "dataset": "advising",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the average clarity score for each instructor who taught a course?",
+    "query": "SELECT i.name, i.instructor_id, AVG(c.clarity_score) FROM course c JOIN course_offering co ON c.course_id = co.course_id JOIN offering_instructor oi ON co.offering_id = oi.offering_id JOIN instructor i ON oi.instructor_id = i.instructor_id GROUP BY i.name, i.instructor_id",
+    "answer": "Gilbert Strang, 3, 4.0000000000000000; John Smith, 1, 3.6666666666666667; Brendan Burns, 4, 2.0000000000000000; Jane Doe, 2, 4.5000000000000000",
+    "dataset": "advising",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "How many course offerings have a final exam and how many do not?",
+    "query": "SELECT course_offering.has_final_exam, COUNT(offering_id) AS num_courses FROM course_offering GROUP BY course_offering.has_final_exam;SELECT COUNT(CASE WHEN co.has_final_exam THEN 1 END) AS num_with_final_exam, COUNT(CASE WHEN NOT co.has_final_exam THEN 1 END) AS num_without_final_exam FROM course_offering co;",
+    "answer": "6, 2",
+    "dataset": "advising",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "How many courses does each department offer?",
+    "query": "SELECT course.department, COUNT(DISTINCT course.course_id) AS num_courses FROM course GROUP BY course.department ORDER BY num_courses DESC NULLS LAST;",
+    "answer": "Computer Science, 2; Mathematics, 1; Physics, 1",
+    "dataset": "advising",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "How many courses are offered for each semester id?",
+    "query": "SELECT course_offering.semester, COUNT(DISTINCT course_offering.course_id) AS num_courses FROM course_offering GROUP BY course_offering.semester ORDER BY course_offering.semester;SELECT semester.semester_id, COUNT(DISTINCT course_offering.course_id) AS num_courses FROM semester LEFT JOIN course_offering ON semester.semester_id = course_offering.semester GROUP BY semester.semester_id;",
+    "answer": "1, 2; 2, 2; 3, 2; 4, 2",
+    "dataset": "advising",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "Which course has the highest number of enrolled students, and what is the enrollment number?",
+    "query": "SELECT course.name, course.course_id, course.number, course.num_enrolled FROM course ORDER BY course.num_enrolled DESC NULLS LAST LIMIT 1",
+    "answer": "Advanced Calculus, 2, MATH201, 5",
+    "dataset": "advising",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of students who participated actively for each course id, ordered from highest to lowest participants?",
+    "query": "SELECT course_tags_count.course_id, course_tags_count.participation FROM course_tags_count ORDER BY course_tags_count.participation DESC NULLS LAST;",
+    "answer": "3, 3; 4, 3; 1, 2; 2, 1",
+    "dataset": "advising",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of students enrolled in each course, ordered from highest to lowest?",
+    "query": "SELECT course.course_id, course.name, course.number, SUM(course.num_enrolled) AS total_students FROM course GROUP BY course.course_id, course.name, course.number ORDER BY total_students DESC NULLS LAST",
+    "answer": "2, Advanced Calculus, MATH201, 5; 1, Introduction to Computer Science, CS101, 3; 4, Distributed Databases, CS302, 3; 3, Introduction to Physics, PHYS101, 1",
+    "dataset": "advising",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of credits earned by each student, ordered from highest to lowest? Give the student id and the total number of credits.",
+    "query": "SELECT student.student_id, student.total_credit FROM student ORDER BY student.total_credit DESC NULLS LAST;",
+    "answer": "1, 13; 2, 7; 3, 7; 4, 7; 5, 7",
+    "dataset": "advising",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the name of the instructor who has taught the most courses, and how many courses have they taught?",
+    "query": "SELECT instructor.name, count(offering_instructor.offering_id) AS num_courses FROM offering_instructor JOIN instructor ON offering_instructor.instructor_id = instructor.instructor_id GROUP BY instructor.name ORDER BY num_courses DESC LIMIT 1;",
+    "answer": "John Smith, 6",
+    "dataset": "advising",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of the total number of students enrolled in courses with exams to the total number of students enrolled in courses without exams?",
+    "query": "SELECT SUM(CASE WHEN c.has_exams THEN c.num_enrolled ELSE 0 END)::FLOAT / SUM(CASE WHEN NOT c.has_exams THEN c.num_enrolled ELSE 0 END) AS ratio FROM course c;",
+    "answer": "3.0",
+    "dataset": "advising",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of the number of students who found the grading criteria clear and easy to understand to the number of students who received good feedback from the instructor for each course id?",
+    "query": "SELECT course_tags_count.course_id, CAST(course_tags_count.clear_grading AS FLOAT) / NULLIF(course_tags_count.good_feedback, 0) AS ratio FROM course_tags_count ORDER BY course_tags_count.course_id NULLS LAST;",
+    "answer": "1, 1.25; 2, 1.3333333333333333; 3, 1.5; 4, 1.0",
+    "dataset": "advising",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of the number of courses with projects to the number of courses with exams in each semester id?",
+    "query": "SELECT course_offering.semester, CAST(SUM(CASE WHEN course.has_projects THEN 1 ELSE 0 END) AS FLOAT) / NULLIF(SUM(CASE WHEN course.has_exams THEN 1 ELSE 0 END), 0) AS ratio FROM course JOIN course_offering ON course.course_id = course_offering.course_id GROUP BY course_offering.semester ORDER BY course_offering.semester NULLS LAST;",
+    "answer": "1, 2.0; 2, 0.5; 3, 2.0; 4, 0.5",
+    "dataset": "advising",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of helpfulness scores to clarity scores for each course ID?",
+    "query": "SELECT course.course_id, CAST(course.helpfulness_score AS FLOAT) / NULLIF(course.clarity_score, 0) AS ratio FROM course;",
+    "answer": "1, 0.8; 2, 0.75; 3, 1.25; 4, 2.5",
+    "dataset": "advising",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "How does the ratio of enrolled students to the number of reviews vary across different courses?",
+    "query": "SELECT course.course_id, course.name, course.number, CAST(course.num_enrolled AS FLOAT) / NULLIF(course.num_reviews, 0) AS student_review_ratio FROM course ORDER BY student_review_ratio NULLS LAST",
+    "answer": "3, Introduction to Physics, PHYS101, 0.125; 1, Introduction to Computer Science, CS101, 0.3; 4, Distributed Databases, CS302, 0.75; 2, Advanced Calculus, MATH201, 1.0",
+    "dataset": "advising",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "Which courses have been taken by students in the Computer Science program?",
+    "query": "SELECT DISTINCT course.name, course.course_id, course.number AS course_name FROM student JOIN student_record ON student.student_id = student_record.student_id JOIN program ON student.program_id = program.program_id JOIN course ON student_record.course_id = course.course_id WHERE program.name ILIKE '%Computer Science%'",
+    "answer": "Advanced Calculus, 2, MATH201; Distributed Databases, 4, CS302; Introduction to Computer Science, 1, CS101; Introduction to Physics, 3, PHYS101",
+    "dataset": "advising",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "Which courses have a final project and a final exam?",
+    "query": "SELECT DISTINCT course.name, course.course_id, course.number FROM course_offering JOIN course ON course_offering.course_id = course.course_id WHERE course_offering.has_final_project = true AND course_offering.has_final_exam = true",
+    "answer": "Advanced Calculus, 2, MATH201",
+    "dataset": "advising",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of students who have taken a course with a final project or exam?",
+    "query": "SELECT COUNT(DISTINCT student_record.student_id) AS total_students FROM student_record JOIN course_offering ON student_record.course_id = course_offering.course_id WHERE course_offering.has_final_project = true OR course_offering.has_final_exam = true;",
+    "answer": "5",
+    "dataset": "advising",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of credits earned by students in each program?",
+    "query": "SELECT program.name, program.program_id, SUM(student.total_credit) AS total_credits FROM student JOIN program ON student.program_id = program.program_id GROUP BY program.name, program.program_id",
+    "answer": "Computer Science, 1, 27; Mathematics, 2, 7; Physics, 3, 7",
+    "dataset": "advising",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "How many students have declared a major in each program?",
+    "query": "SELECT program.name, program.program_id, COUNT(student.student_id) AS number_of_students FROM student JOIN program ON student.program_id = program.program_id WHERE student.declare_major IS NOT NULL GROUP BY program.name, program.program_id ORDER BY number_of_students DESC",
+    "answer": "Computer Science, 1, 3; Mathematics, 2, 1; Physics, 3, 1",
+    "dataset": "advising",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "Which students have declared a minor program? List their firstname and lastname. Order the results by the students' last names.",
+    "query": "SELECT student.firstname, student.lastname FROM student WHERE student.minor IS NOT NULL ORDER BY student.lastname NULLS LAST;",
+    "answer": "Sarah, Brown; David, Johnson",
+    "dataset": "advising",
+    "category": "instruct",
+    "instructions": "student.declare_major is null for students who have not declared their major.\nstudent.minor is null for students who have not declared a minor program."
+  },
+  {
+    "question": "What is the average GPA of students in the program mathematics?",
+    "query": "SELECT AVG(student.total_gpa) FROM student JOIN program ON student.program_id = program.program_id WHERE LOWER(program.name) = 'mathematics';",
+    "answer": "3.6000000000000000",
+    "dataset": "advising",
+    "category": "instruct",
+    "instructions": "Match strings case-insensitively"
+  },
+  {
+    "question": "What are the names of all the courses offered by the department of Computer Science?",
+    "query": "SELECT course.name FROM course WHERE course.department ILIKE '%Computer Science%' ORDER BY course.name ASC NULLS LAST;",
+    "answer": "Distributed Databases; Introduction to Computer Science",
+    "dataset": "advising",
+    "category": "instruct",
+    "instructions": "Filter strings using ILIKE.\nUse the student_record table for all information relating to students' choices and their course."
+  },
+  {
+    "question": "What are the easiness scores for courses in the \"Computer Science\" department? Show both courses and scores.",
+    "query": "SELECT course.name, course.course_id, course.number, course.easiness_score FROM course WHERE course.department = 'Computer Science'",
+    "answer": "Introduction to Computer Science, 1, CS101, 3; Distributed Databases, 4, CS302, 1",
+    "dataset": "advising",
+    "category": "instruct",
+    "instructions": "Always filter names using exact string matching"
+  },
+  {
+    "question": "Return the student IDs who have taken an in-person course and have gotten a grade of A or C.",
+    "query": "SELECT DISTINCT student_id FROM student_record WHERE student_record.how = 'in-person' AND student_record.grade IN ('A', 'C');",
+    "answer": "1; 2; 4",
+    "dataset": "advising",
+    "category": "instruct",
+    "instructions": "Always filter strings with an exact match.\nWhen asked for specific students or courses, do not return duplicates."
+  },
+  {
+    "question": "Which flight has the shortest duration between departure and arrival times? Convert to integer minutes.",
+    "query": "SELECT flight.flight_number, flight.flight_id, (arrival_time - departure_time) / 60 AS duration_minutes FROM flight ORDER BY duration_minutes LIMIT 1",
+    "answer": "AA123, 1, 60",
+    "dataset": "atis",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "What's the average duration between departure and arrival times minus 34 minutes? Convert from UNIX to regular datetime, and return the answer in minutes",
+    "query": "SELECT avg(to_timestamp(arrival_time) - to_timestamp(departure_time) - interval '34 minutes') AS average_duration FROM flight;SELECT AVG(arrival_time - departure_time)/60 - 34 AS average_duration FROM flight;",
+    "answer": "109.3333333333333333",
+    "dataset": "atis",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "Count the number of flight departures for each month?",
+    "query": "SELECT month.month_name, count(*) AS departure_count FROM flight JOIN month ON extract(MONTH FROM to_timestamp(flight.departure_time)) = month.month_number GROUP BY month.month_name, month.month_number ORDER BY month.month_number;SELECT date_trunc('month', to_timestamp(flight.departure_time)) AS month, COUNT(*) AS num_departures FROM flight GROUP BY MONTH ORDER BY MONTH;SELECT EXTRACT(MONTH FROM to_timestamp(flight.departure_time)) AS month, COUNT(*) AS num_departures FROM flight GROUP BY month ORDER BY month;SELECT TO_CHAR(TO_TIMESTAMP(flight.departure_time), 'YYYY-MM') AS month, COUNT(*) AS num_departures FROM flight GROUP BY month ORDER BY month;",
+    "answer": "2020-01, 10",
+    "dataset": "atis",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "What's the earliest flight departure time in the day in HH:MM?",
+    "query": "SELECT to_char(to_timestamp(departure_time)::TIME, 'HH24:MI') AS earliest_departure_time FROM flight ORDER BY earliest_departure_time LIMIT 1;",
+    "answer": "00:00",
+    "dataset": "atis",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "What's the absolute difference in time in days between today and the earliest flight departure? Give the answer as an integer.",
+    "query": "SELECT date_part('day', CURRENT_DATE - to_timestamp(departure_time)) AS difference_in_days FROM flight ORDER BY departure_time LIMIT 1;SELECT (CURRENT_DATE - TO_TIMESTAMP(MIN(f.departure_time))) AS days_difference FROM flight f;SELECT CAST(ABS((EXTRACT(EPOCH FROM CURRENT_TIMESTAMP) - EXTRACT(EPOCH FROM TO_TIMESTAMP(MIN(departure_time)))) / 86400) AS INTEGER) AS diff_in_days FROM flight;",
+    "answer": "2012",
+    "dataset": "atis",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total cost of round-trip fares for each airline code?",
+    "query": "SELECT fare.fare_airline, SUM(fare.round_trip_cost) AS total_round_trip_cost FROM fare GROUP BY fare.fare_airline ORDER BY total_round_trip_cost DESC;",
+    "answer": "AA, 950; UA, 680; VX, 500; F9, 400; AS, 400; HA, 400; WN, 350",
+    "dataset": "atis",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the average cost of round-trip fares from Los Angeles (LAX) to Chicago (ORD) for each airline, sorted in descending order by average cost?",
+    "query": "SELECT fare.fare_airline, AVG(fare.round_trip_cost) AS average_cost FROM fare WHERE fare.from_airport = 'LAX' AND fare.to_airport = 'ORD' GROUP BY fare.fare_airline ORDER BY average_cost DESC NULLS LAST;SELECT airline.airline_name, AVG(fare.round_trip_cost) AS avg_round_trip_cost FROM fare JOIN airline ON fare.fare_airline = airline.airline_code WHERE fare.from_airport = 'LAX' AND fare.to_airport = 'ORD' GROUP BY airline.airline_name ORDER BY avg_round_trip_cost DESC;",
+    "answer": "Virgin America, 500.0000000000000000; Hawaiian Airlines, 400.0000000000000000",
+    "dataset": "atis",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the average cost of a one-way trip for each airport pair in the fare table?",
+    "query": "SELECT f.from_airport, f.to_airport, AVG(f.one_direction_cost) AS average_cost FROM fare f GROUP BY f.from_airport, f.to_airport ORDER BY f.from_airport, f.to_airport NULLS LAST;",
+    "answer": "JFK, LAX, 230.0000000000000000; JFK, ORD, 200.0000000000000000; LAX, ORD, 255.0000000000000000; ORD, JFK, 195.0000000000000000; ORD, LAX, 220.0000000000000000",
+    "dataset": "atis",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "How many meals are served in each compartment, sorted by the number of meals in descending order?",
+    "query": "SELECT food_service.compartment, COUNT(food_service.meal_number) AS number_of_meals FROM food_service GROUP BY food_service.compartment ORDER BY number_of_meals DESC NULLS LAST;",
+    "answer": "First Class, 3; Economy, 3",
+    "dataset": "atis",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "How many flights depart from each airport code, excluding departures with connections?",
+    "query": "SELECT airport.airport_code, COUNT(flight.from_airport) AS num_departures FROM airport LEFT JOIN flight ON airport.airport_code = flight.from_airport AND flight.connections=0 GROUP BY airport.airport_code;SELECT airport.airport_code, COUNT(flight.from_airport) AS num_departures FROM airport JOIN flight ON airport.airport_code = flight.from_airport WHERE flight.connections=0 GROUP BY airport.airport_code;",
+    "answer": "JFK, 1; LAX, 1; ORD, 3",
+    "dataset": "atis",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "Which flight ids to Chicago (ORD) have the longest duration from departure to arrival, sorted in ascending order?",
+    "query": "SELECT flight.flight_id, (flight.arrival_time - flight.departure_time) AS duration FROM flight WHERE to_airport = 'ORD' ORDER BY duration ASC NULLS LAST;",
+    "answer": "7, 3700; 9, 4000; 6, 12000; 10, 20000",
+    "dataset": "atis",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "Which airports have the shortest minimum connect time, sorted in ascending order? Show the minimum connect time.",
+    "query": "SELECT airport.airport_name, airport.airport_code, airport.minimum_connect_time FROM airport ORDER BY airport.minimum_connect_time ASC NULLS LAST",
+    "answer": "Hartsfield-Jackson Atlanta International Airport, ATL, 10; Los Angeles International Airport, LAX, 20; John F. Kennedy International Airport, JFK, 23; O’Hare International Airport, ORD, 24; McCarran International Airport, LAS, 30; Dallas/Fort Worth International Airport, DFW, 40; Denver International Airport, DEN, 42; San Francisco International Airport, SFO, 49; Seattle-Tacoma International Airport, SEA, 50; Orlando International Airport, MCO, 50",
+    "dataset": "atis",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "Which aircraft code can carry the highest weight of cargo that any aircraft can carry?",
+    "query": "SELECT aircraft.aircraft_code FROM aircraft ORDER BY pay_load DESC NULLS LAST LIMIT 1;",
+    "answer": "A380",
+    "dataset": "atis",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What are the top 2 airlines with the most flights?",
+    "query": "SELECT airline.airline_name, airline.airline_code, COUNT(flight.flight_id) AS number_of_flights FROM flight JOIN airline ON flight.airline_code = airline.airline_code GROUP BY airline.airline_name, airline.airline_code ORDER BY number_of_flights DESC NULLS LAST LIMIT 2",
+    "answer": "American Airlines, AA, 3; United Airlines, UA, 2",
+    "dataset": "atis",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What are the aircraft codes for all aircraft with a cruising speed of over 200 mph? sort the aircraft codes in ascending order.",
+    "query": "SELECT aircraft.aircraft_code FROM aircraft WHERE aircraft.cruising_speed > 200 ORDER BY aircraft.aircraft_code ASC NULLS LAST;",
+    "answer": "A320; A330; A350; A380; B737; B747; B777; B787; CRJ200; E190",
+    "dataset": "atis",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "Calculate the ratio of the maximum range to the maximum payload for each aircraft",
+    "query": "SELECT aircraft.range_miles::float / NULLIF(aircraft.pay_load, 0) AS range_to_payload_ratio FROM aircraft;",
+    "answer": "0.14258333333333334; 0.11; 0.11; 0.05714285714285714; 0.12221428571428572; 0.09769230769230769; 0.1369090909090909; 0.11428571428571428; 0.16; 0.2753968253968254",
+    "dataset": "atis",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of one-way trip costs to round-trip costs for each fare?",
+    "query": "SELECT fare.fare_id, fare.one_direction_cost::float / NULLIF(fare.round_trip_cost, 0) AS cost_ratio FROM fare ORDER BY cost_ratio;",
+    "answer": "7, 0.525; 2, 0.5357142857142857; 10, 0.54; 6, 0.5428571428571428; 5, 0.55; 8, 0.575; 9, 0.6; 3, 0.6; 1, 0.6666666666666666; 4, 0.7142857142857143",
+    "dataset": "atis",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of aircraft capacity to its range in miles for each aircraft code?",
+    "query": "SELECT aircraft.aircraft_code, CAST(aircraft.capacity AS FLOAT) / NULLIF(aircraft.range_miles, 0) AS capacity_range_ratio FROM aircraft;",
+    "answer": "B747, 0.04862653419053185; A320, 0.07272727272727272; B737, 0.05974025974025974; A380, 0.106625; B777, 0.06428988895382817; A330, 0.06929133858267716; B787, 0.043824701195219126; A350, 0.055; E190, 0.0475; CRJ200, 0.02881844380403458",
+    "dataset": "atis",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the proportion of flights with stops out of all flights for each airline code?",
+    "query": "SELECT flight.airline_code, CAST(SUM(CASE WHEN flight.stops > 0 THEN 1 ELSE 0 END) AS FLOAT) / NULLIF(COUNT(*), 0) AS ratio FROM flight GROUP BY flight.airline_code;",
+    "answer": "AA, 0.3333333333333333; F9, 1.0; VX, 1.0; UA, 0.5; AS, 0.0; HA, 0.0; WN, 1.0",
+    "dataset": "atis",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "How does the average ratio of the cruising speed to the payload of an aircraft vary across different aircraft manufacturers?",
+    "query": "SELECT aircraft.manufacturer, AVG(CAST(aircraft.cruising_speed AS FLOAT) / NULLIF(aircraft.pay_load, 0)) AS speed_payload_ratio FROM aircraft GROUP BY aircraft.manufacturer ORDER BY speed_payload_ratio DESC NULLS LAST;",
+    "answer": "Bombardier, 0.08476190476190476; Embraer, 0.03613333333333334; Boeing, 0.010741883116883118; Airbus, 0.009440750915750916",
+    "dataset": "atis",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "Which flights serve meals in first class? Give me the flight id and meal description.",
+    "query": "SELECT flight.flight_id, food_service.meal_description FROM flight JOIN food_service ON flight.meal_code = food_service.meal_code WHERE LOWER(food_service.compartment) LIKE '%first class%';",
+    "answer": "1, Breakfast; 2, Lunch; 3, Dinner; 5, Breakfast; 6, Lunch; 7, Dinner",
+    "dataset": "atis",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "Which airlines offer flights with a stopover in Dallas?",
+    "query": "SELECT DISTINCT airline.airline_name, airline.airline_code FROM flight_stop JOIN airport ON flight_stop.stop_airport = airport.airport_code JOIN flight ON flight_stop.flight_id = flight.flight_id JOIN airline ON flight.airline_code = airline.airline_code WHERE airport.airport_location ILIKE '%Dallas%'",
+    "answer": "American Airlines, AA; United Airlines, UA",
+    "dataset": "atis",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "Which airlines offer flights from LAX to ORD?",
+    "query": "SELECT DISTINCT airline.airline_name, airline.airline_code FROM flight JOIN airline ON flight.airline_code = airline.airline_code WHERE flight.from_airport = 'LAX' AND flight.to_airport = 'ORD'",
+    "answer": "Hawaiian Airlines, HA; Virgin America, VX",
+    "dataset": "atis",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "Which airlines offer flights from Chicago (ORD) to New York (JFK), and how many stops do they have, sorted by number of stops in ascending order?",
+    "query": "SELECT airline.airline_name, airline.airline_code, flight.stops FROM flight JOIN airline ON flight.airline_code = airline.airline_code WHERE flight.from_airport = 'ORD' AND flight.to_airport = 'JFK' ORDER BY flight.stops NULLS LAST",
+    "answer": "American Airlines, AA, 0; American Airlines, AA, 0; United Airlines, UA, 1; Southwest Airlines, WN, 1",
+    "dataset": "atis",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "Which airlines do not have any flights that either depart from/arrive at JFK, or have one or more stops?",
+    "query": "SELECT DISTINCT airline.airline_name, airline.airline_code FROM airline WHERE airline.airline_code NOT IN (SELECT flight.airline_code FROM flight WHERE flight.from_airport = 'JFK' OR flight.to_airport = 'JFK' OR flight.stops > 0)",
+    "answer": "Spirit Airlines, NK; Alaska Airlines, AS; Hawaiian Airlines, HA; Delta Air Lines, DL; JetBlue Airways, B6",
+    "dataset": "atis",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "Which state code is Orlando International Airport in?",
+    "query": "SELECT state_code FROM airport WHERE airport_name ILIKE '%Orlando International Airport%';",
+    "answer": "FL",
+    "dataset": "atis",
+    "category": "instruct",
+    "instructions": "Filter airport, city, country names using ILIKE.\nFilter state code (eg NY), airport codes (eg JFK) using case-insensitive matches.\nIf multiple flight days are requested, use ILIKE and wildcards for each of the days separately, since they are not necessarily ordered."
+  },
+  {
+    "question": "Which flights operate on Mondays and Wednesdays? Give me the relevant flight numbers",
+    "query": "SELECT flight.flight_number, flight.flight_id FROM flight WHERE LOWER(flight.flight_days) LIKE '%mon%' AND LOWER(flight.flight_days) LIKE '%wed%'",
+    "answer": "AA123, 1; VX890, 10",
+    "dataset": "atis",
+    "category": "instruct",
+    "instructions": "Filter airport, city, country names using ILIKE.\nFilter state code (eg NY), airport codes (eg JFK) using case-insensitive matches.\nIf multiple flight days are requested, use ILIKE for each of the days separately, since they are not necessarily ordered."
+  },
+  {
+    "question": "What is the total cost of all round-trip fares from New York (JFK) to Los Angeles?",
+    "query": "SELECT SUM(fare.round_trip_cost) AS total_round_trip_cost FROM fare WHERE fare.from_airport = 'JFK' AND fare.to_airport = 'LAX';",
+    "answer": "400",
+    "dataset": "atis",
+    "category": "instruct",
+    "instructions": "Filter airport, city, country names using ILIKE.\nFilter state code (eg NY), airport codes (eg JFK) using case-insensitive matches.\nfare.round_trip_required is not needed when getting the round trip cost."
+  },
+  {
+    "question": "What is the minimum amount of time required for a connecting flight at JFK Airport?",
+    "query": "SELECT minimum_connect_time FROM airport WHERE airport_code = 'JFK';",
+    "answer": "23",
+    "dataset": "atis",
+    "category": "instruct",
+    "instructions": "Filter airport, city, country names using ILIKE.\nFilter state code (eg NY) and airport codes (eg JFK) using upper-case matches."
+  },
+  {
+    "question": "How many flights require a round-trip to purchase the fare?",
+    "query": "SELECT COUNT(DISTINCT flight_fare.flight_id) FROM flight_fare JOIN fare ON flight_fare.fare_id = fare.fare_id WHERE fare.round_trip_required = 'Yes';",
+    "answer": "5",
+    "dataset": "atis",
+    "category": "instruct",
+    "instructions": "Filter airport, city, country names using ILIKE.\nFilter state code (eg NY) and airport codes (eg JFK) using upper-case matches."
+  },
+  {
+    "question": "What is the total population in cities by country?",
+    "query": "SELECT city.country_name, SUM(city.population) AS total_population FROM city GROUP BY city.country_name ORDER BY total_population DESC NULLS LAST;",
+    "answer": "United States, 9500000; Brazil, 3000000; India, 1200000; United Kingdom, 900000; Canada, 800000; Japan, 700000; Mexico, 600000",
+    "dataset": "geography",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the average length of rivers in each country?",
+    "query": "SELECT river.country_name, AVG(river.length) AS average_length FROM river GROUP BY river.country_name ORDER BY average_length DESC NULLS LAST;",
+    "answer": "Egypt, 1000.0000000000000000; Russia, 800.0000000000000000; Germany, 800.0000000000000000; Vietnam, 600.0000000000000000; Brazil, 500.0000000000000000; Canada, 400.0000000000000000; China, 300.0000000000000000; United States, 200.0000000000000000; Italy, 100.0000000000000000",
+    "dataset": "geography",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "How many rivers flow through each country?",
+    "query": "SELECT river.country_name, COUNT(DISTINCT river.river_name) AS number_of_rivers FROM river GROUP BY river.country_name ORDER BY number_of_rivers DESC;",
+    "answer": "Germany, 2; Canada, 1; China, 1; Egypt, 1; Italy, 1; Russia, 1; United States, 1; Brazil, 1; Vietnam, 1",
+    "dataset": "geography",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "How many mountains are there in each country?",
+    "query": "SELECT mountain.country_name, COUNT(mountain.mountain_name) AS number_of_mountains FROM mountain GROUP BY mountain.country_name ORDER BY number_of_mountains DESC;",
+    "answer": "Nepal, 8; Pakistan, 2",
+    "dataset": "geography",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "How many lakes are there in each state?",
+    "query": "SELECT lake.state_name, COUNT(lake.lake_name) AS lake_count FROM lake GROUP BY lake.state_name ORDER BY lake_count DESC;SELECT s.state_name, COUNT(l.lake_name) AS lake_count FROM state s LEFT JOIN lake l ON s.state_name = l.state_name GROUP BY s.state_name ORDER BY s.state_name;",
+    "answer": "12 records returned",
+    "dataset": "geography",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "Which states have the highest population density in people per square kilometer, ordered from highest to lowest?",
+    "query": "SELECT state.state_name, state.density FROM state ORDER BY state.density DESC NULLS LAST;",
+    "answer": "12 records returned",
+    "dataset": "geography",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "Which lakes have the largest areas in square kilometers, ordered from largest to smallest?",
+    "query": "SELECT lake.lake_name, lake.area FROM lake ORDER BY lake.area DESC NULLS LAST;",
+    "answer": "Lake Qinghai, 1200.0; Lake Superior, 1000.0; Lake Baikal, 900.0; Lake Victoria, 800.0; Lake Malawi, 700.0; Lake Tanganyika, 600.0; Lake Michigan, 500.0; Lake Ontario, 400.0; Lake Huron, 300.0; Lake Erie, 200.0",
+    "dataset": "geography",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What are the top 5 cities with the highest population? Give both city names and the population.",
+    "query": "SELECT city.city_name, city.population FROM city ORDER BY city.population DESC NULLS LAST LIMIT 5;",
+    "answer": "Los Angeles, 5000000; Sao Paulo, 3000000; Houston, 2000000; Chicago, 1500000; Mumbai, 1200000",
+    "dataset": "geography",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What are the longest rivers in meters, ordered from longest to shortest?",
+    "query": "SELECT river.river_name, river.length FROM river ORDER BY river.length DESC NULLS LAST;",
+    "answer": "Nile, 1000; Rhine, 900; Volga, 800; Danube, 700; Mekong, 600; Amazon, 500; Yukon, 400; Yangtze, 300; Mississippi, 200; Po, 100",
+    "dataset": "geography",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What are the highest mountains in meters, ordered from highest to lowest altitude?",
+    "query": "SELECT mountain.mountain_name, mountain.mountain_altitude FROM mountain ORDER BY mountain.mountain_altitude DESC NULLS LAST;",
+    "answer": "Mount Everest, 10000; Nanga Parbat, 9000; Cho Oyu, 8000; Manaslu, 7000; Dhaulagiri, 6000; K2, 5000; Makalu, 4000; Kangchenjunga, 3000; Lhotse, 2000; Annapurna, 1000",
+    "dataset": "geography",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of the population of the United States to the population of California?",
+    "query": "SELECT CAST(SUM(NULLIF(state.population, 0)) FILTER (WHERE LOWER(state.country_name) LIKE '%united states%') AS FLOAT) / CAST(SUM(NULLIF(state.population, 0)) FILTER (WHERE LOWER(state.state_name) LIKE '%california%') AS FLOAT) AS population_ratio FROM state;",
+    "answer": "7.1",
+    "dataset": "geography",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of the length of the Mississippi River to the length of the Rhine River?",
+    "query": "SELECT CAST((SELECT length FROM river WHERE LOWER(river_name) LIKE '%mississippi%') AS FLOAT) / NULLIF((SELECT length FROM river WHERE LOWER(river_name) LIKE '%rhine%'), 0) AS ratio ;",
+    "answer": "0.2222222222222222",
+    "dataset": "geography",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of the altitude of 'Mount Everest' to the altitude of 'Dhaulagiri'? Match strings exactly",
+    "query": "SELECT (CAST(everest.mountain_altitude AS FLOAT) / NULLIF(dhaulagiri.mountain_altitude, 0)) AS altitude_ratio FROM (SELECT mountain_altitude FROM mountain WHERE mountain_name = 'Mount Everest') AS everest, (SELECT mountain_altitude FROM mountain WHERE mountain_name = 'Dhaulagiri') AS dhaulagiri;",
+    "answer": "1.6666666666666667",
+    "dataset": "geography",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "How does the population of each city vary in relation to the population of its corresponding state? Return the city name, and the proportion of each city's population relative to the state.",
+    "query": "SELECT city.city_name, CAST(city.population AS float) / NULLIF(state.population, 0) AS population_ratio FROM city JOIN state ON city.state_name = state.state_name ORDER BY population_ratio DESC NULLS LAST;",
+    "answer": "London, 100.0; Sao Paulo, 60.0; Los Angeles, 50.0; Houston, 40.0; Tokyo, 10.0; Toronto, 10.0; Mumbai, 6.0; New York, 5.0",
+    "dataset": "geography",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "Get the ratio of population per area for each state",
+    "query": "SELECT state_name, population / NULLIF(area, 0) AS population_density FROM state;",
+    "answer": "12 records returned",
+    "dataset": "geography",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "Which countries have both lakes and rivers?",
+    "query": "SELECT DISTINCT lake.country_name FROM lake JOIN river ON lake.country_name = river.country_name;",
+    "answer": "United States; China; Russia",
+    "dataset": "geography",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "Which states border the state where lake ontario is?",
+    "query": "SELECT border_info.border FROM border_info JOIN lake ON border_info.state_name = lake.state_name WHERE lake.lake_name ilike '%Ontario%';",
+    "answer": "Pennsylvania; Connecticut; Massachusetts",
+    "dataset": "geography",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "Which lakes have a name that starts with \"Lake\"? They should be located in states with an area greater than 1000 square kilometers.",
+    "query": "SELECT lake.lake_name FROM lake JOIN state ON lake.state_name = state.state_name WHERE state.area > 1000 AND lake.lake_name ilike 'Lake%' ORDER BY lake.lake_name NULLS LAST;",
+    "answer": "Lake Erie; Lake Huron; Lake Michigan; Lake Ontario; Lake Superior",
+    "dataset": "geography",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "What is the highest point in each state and what is the population density of that state?",
+    "query": "SELECT highlow.state_name, highlow.highest_point, state.density FROM highlow JOIN state ON highlow.state_name = state.state_name;",
+    "answer": "California, Mount Whitney, 1000.0; Texas, Guadalupe Peak, 1000.0; Florida, Unnamed location, 1000.0; New York, Mount Marcy, 1000.0; Ontario, Unnamed location, 1000.0; Sao Paulo, Unnamed location, 1000.0; Guangdong, Unnamed location, 1000.0; Maharashtra, Unnamed location, 1000.0; England, Scafell Pike, 1000.0; Tokyo, Mount Fuji, 1000.0",
+    "dataset": "geography",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "What is the average length of rivers per country in countries with a lake?",
+    "query": "SELECT l.country_name, AVG(r.length) AS average_length FROM river r JOIN lake l ON r.country_name = l.country_name GROUP BY 1;",
+    "answer": "United States, 200.0000000000000000; China, 300.0000000000000000; Russia, 800.0000000000000000",
+    "dataset": "geography",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "Which states have fewer than a hundred thousand people?",
+    "query": "SELECT state_name FROM state WHERE population < 100000;",
+    "answer": "Texas; Ontario; Sao Paulo; England; Tokyo; Ohio",
+    "dataset": "geography",
+    "category": "instruct",
+    "instructions": "Always filter names using ILIKE"
+  },
+  {
+    "question": "Which rivers traverse at least 3 cities/landmarks?",
+    "query": "SELECT river_name FROM river WHERE traverse LIKE '%,%,%';",
+    "answer": "Nile; Yangtze; Mississippi; Volga; Danube; Rhine; Po",
+    "dataset": "geography",
+    "category": "instruct",
+    "instructions": "Always filter names using ILIKE"
+  },
+  {
+    "question": "What are the names and areas of the lakes in Michigan?",
+    "query": "SELECT lake_name, area FROM lake WHERE state_name ILIKE '%Michigan%';",
+    "answer": "Lake Superior, 1000.0; Lake Michigan, 500.0; Lake Huron, 300.0",
+    "dataset": "geography",
+    "category": "instruct",
+    "instructions": "Always filter names using ILIKE"
+  },
+  {
+    "question": "What are the names and altitudes of the mountains in Nepal?",
+    "query": "SELECT mountain_name, mountain_altitude FROM mountain WHERE country_name ILIKE '%Nepal%';",
+    "answer": "Mount Everest, 10000; Kangchenjunga, 3000; Lhotse, 2000; Makalu, 4000; Cho Oyu, 8000; Dhaulagiri, 6000; Manaslu, 7000; Annapurna, 1000",
+    "dataset": "geography",
+    "category": "instruct",
+    "instructions": "Always filter names using ILIKE"
+  },
+  {
+    "question": "Get the cities in the United States and their population",
+    "query": "SELECT city_name, population FROM city WHERE country_name ILIKE '%United States%';",
+    "answer": "New York, 1000000; Los Angeles, 5000000; Chicago, 1500000; Houston, 2000000",
+    "dataset": "geography",
+    "category": "instruct",
+    "instructions": "Always filter names using ILIKE"
+  },
+  {
+    "question": "What is the total number of restaurants serving each type of food?",
+    "query": "SELECT restaurant.food_type, COUNT(DISTINCT restaurant.id) AS total_number_of_restaurants FROM restaurant GROUP BY restaurant.food_type;",
+    "answer": "American, 3; Italian, 2; Japanese, 2; Mexican, 1; Seafood, 2; Vegan, 1",
+    "dataset": "restaurants",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total count of restaurants in each city?",
+    "query": "SELECT location.city_name, COUNT(DISTINCT location.restaurant_id) AS total_count FROM LOCATION GROUP BY location.city_name;",
+    "answer": "Los Angeles, 3; Miami, 2; New York, 3; San Francisco, 3",
+    "dataset": "restaurants",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the average rating of restaurants serving each type of food?",
+    "query": "SELECT restaurant.food_type, AVG(restaurant.rating) AS average_rating FROM restaurant GROUP BY restaurant.food_type ORDER BY average_rating DESC NULLS LAST;",
+    "answer": "Vegan, 4.599999904632568; Italian, 4.599999904632568; Seafood, 4.5; Japanese, 4.25; Mexican, 4.099999904632568; American, 3.800000031789144",
+    "dataset": "restaurants",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "How many restaurants serve Italian food in each city?",
+    "query": "SELECT restaurant.city_name, COUNT(*) AS number_of_restaurants FROM restaurant WHERE restaurant.food_type ILIKE '%Italian%' GROUP BY restaurant.city_name ORDER BY number_of_restaurants DESC NULLS LAST;",
+    "answer": "Los Angeles, 1; New York, 1",
+    "dataset": "restaurants",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "How many restaurants are there in each city? Order the results by the number of restaurants in descending order.",
+    "query": "SELECT location.city_name, COUNT(DISTINCT location.restaurant_id) AS number_of_restaurants FROM LOCATION GROUP BY location.city_name ORDER BY number_of_restaurants DESC NULLS LAST;",
+    "answer": "Los Angeles, 3; New York, 3; San Francisco, 3; Miami, 2",
+    "dataset": "restaurants",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "Which street has the most number of restaurants?",
+    "query": "SELECT street_name FROM location GROUP BY street_name ORDER BY COUNT(restaurant_id) DESC LIMIT 1;",
+    "answer": "Pine Ave",
+    "dataset": "restaurants",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "Which restaurants serve Italian cuisine or are located in New York? Order the results by the restaurant name.",
+    "query": "SELECT name FROM restaurant WHERE food_type ILIKE '%Italian%' OR city_name ILIKE '%New York%' ORDER BY name NULLS LAST;",
+    "answer": "The Pasta House; The Pizza Place; The Ramen Shop; The Steakhouse",
+    "dataset": "restaurants",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the average rating of restaurants in each region? Order the results by the region name.",
+    "query": "SELECT geographic.region, AVG(restaurant.rating) AS average_rating FROM restaurant JOIN geographic ON restaurant.city_name = geographic.city_name GROUP BY geographic.region ORDER BY geographic.region NULLS LAST;",
+    "answer": "California, 4.149999936421712; Florida, 4.5; New York, 4.300000031789144",
+    "dataset": "restaurants",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What are the names of the top 3 restaurants with the highest ratings?",
+    "query": "SELECT restaurant.name FROM restaurant ORDER BY restaurant.rating DESC NULLS LAST LIMIT 3;",
+    "answer": "The Pizza Place; The Vegan Cafe; The Seafood Shack",
+    "dataset": "restaurants",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "List the restaurants starting from the best ratings to the lowest",
+    "query": "SELECT name, id, rating FROM restaurant ORDER BY rating DESC",
+    "answer": "11 records returned",
+    "dataset": "restaurants",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of restaurants with rating > 4.5 to the total number of restaurants in the database.",
+    "query": "SELECT COUNT(*)::float / NULLIF((SELECT COUNT(*) FROM restaurant), 0) AS rating_ratio FROM restaurant WHERE rating > 4.5;",
+    "answer": "0.2727272727272727",
+    "dataset": "restaurants",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of restaurants with a rating above 4.0 to restaurants with a rating below 4.0 overall?",
+    "query": "SELECT CAST(SUM(CASE WHEN restaurant.rating > 4.0 THEN 1 ELSE 0 END) AS FLOAT) / NULLIF(SUM(CASE WHEN restaurant.rating < 4.0 THEN 1 ELSE 0 END), 0) AS ratio FROM restaurant;",
+    "answer": "2.6666666666666665",
+    "dataset": "restaurants",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of restaurants with a rating above 4 to restaurants with a rating below 4 in New York?",
+    "query": "SELECT CAST(COUNT(CASE WHEN rating > 4 THEN 1 END) AS FLOAT) / NULLIF(COUNT(CASE WHEN rating < 4 THEN 1 END), 0) AS ratio FROM restaurant WHERE city_name ILIKE 'New York';",
+    "answer": "2.0",
+    "dataset": "restaurants",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of restaurants serving vegan food to restaurants serving non-vegan food in San Francisco? Match food_type case insensitively",
+    "query": "SELECT CAST(SUM(CASE WHEN LOWER(restaurant.food_type) LIKE '%vegan%' THEN 1 ELSE 0 END) AS FLOAT) / NULLIF(SUM(CASE WHEN LOWER(restaurant.food_type) NOT LIKE '%vegan%' THEN 1 ELSE 0 END), 0) AS ratio FROM restaurant WHERE LOWER(restaurant.city_name) ILIKE '%san francisco%';",
+    "answer": "0.5",
+    "dataset": "restaurants",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of Italian restaurants out of all restaurants in Los Angeles?",
+    "query": "SELECT CAST(COUNT(CASE WHEN food_type ILIKE '%Italian%' THEN 1 END) AS FLOAT) / NULLIF(COUNT(food_type), 0) AS ratio FROM restaurant WHERE city_name ILIKE '%Los Angeles%';",
+    "answer": "0.3333333333333333",
+    "dataset": "restaurants",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What cities have more than one restaurants with the same name, and how many of them are there? Return the city name, restaurant name, and restaurant count",
+    "query": "SELECT r.city_name, r.name, COUNT(r.id) AS restaurant_count FROM restaurant r GROUP BY r.city_name, r.name HAVING COUNT(r.id) > 1;",
+    "answer": "Miami, The Seafood Shack, 2",
+    "dataset": "restaurants",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "What is the average rating of restaurants that serve Mexican food in each city?",
+    "query": "SELECT location.city_name, AVG(restaurant.rating) AS average_rating FROM restaurant JOIN LOCATION ON restaurant.id = location.restaurant_id WHERE LOWER(restaurant.food_type) LIKE '%mexican%' GROUP BY location.city_name;",
+    "answer": "San Francisco, 4.099999904632568",
+    "dataset": "restaurants",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "What is the average rating of restaurants in each region?",
+    "query": "SELECT geographic.region, AVG(restaurant.rating) AS average_rating FROM geographic JOIN restaurant ON geographic.city_name=restaurant.city_name GROUP BY 1;",
+    "answer": "California, 4.149999936421712; New York, 4.300000031789144; Florida, 4.5",
+    "dataset": "restaurants",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "How many restaurants serve Italian food in each region?",
+    "query": "SELECT geographic.region, COUNT(restaurant.id) AS number_of_restaurants FROM restaurant JOIN geographic ON restaurant.city_name = geographic.city_name WHERE LOWER(restaurant.food_type) LIKE '%italian%' GROUP BY geographic.region ORDER BY number_of_restaurants DESC NULLS LAST;",
+    "answer": "California, 1; New York, 1",
+    "dataset": "restaurants",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "How many restaurants are there in each region?",
+    "query": "SELECT geographic.region, COUNT(DISTINCT restaurant.id) AS number_of_restaurants FROM geographic JOIN restaurant ON geographic.city_name = restaurant.city_name GROUP BY geographic.region ORDER BY number_of_restaurants DESC;SELECT geographic.region, COUNT(DISTINCT restaurant.id) AS number_of_restaurants FROM geographic LEFT JOIN restaurant ON geographic.city_name = restaurant.city_name GROUP BY geographic.region ORDER BY number_of_restaurants DESC;",
+    "answer": "California, 6; New York, 3; Florida, 2; Illinois, 0",
+    "dataset": "restaurants",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "Which city has the highest-rated restaurant?",
+    "query": "SELECT DISTINCT restaurant.city_name FROM restaurant WHERE rating=(SELECT MAX(rating) FROM restaurant);",
+    "answer": "New York",
+    "dataset": "restaurants",
+    "category": "instruct",
+    "instructions": "Match all strings case-insensitively using wildcard operators"
+  },
+  {
+    "question": "What's the name and rating of all the restaurants that have a rating greater than 4 and are located in the city of New York?",
+    "query": "SELECT restaurant.name, restaurant.rating FROM restaurant WHERE restaurant.rating > 4 AND restaurant.city_name ILIKE '%New York%';",
+    "answer": "The Pizza Place, 4.7; The Ramen Shop, 4.3",
+    "dataset": "restaurants",
+    "category": "instruct",
+    "instructions": "Match all strings case-insensitively using wildcard operators"
+  },
+  {
+    "question": "What's the name and food type of all the restaurants located on Market St in San Francisco?",
+    "query": "SELECT restaurant.name, restaurant.food_type FROM restaurant JOIN LOCATION ON restaurant.id = location.restaurant_id WHERE location.street_name ILIKE '%Market St%' AND location.city_name ILIKE '%San Francisco%';",
+    "answer": "The Tacos & Burritos, Mexican",
+    "dataset": "restaurants",
+    "category": "instruct",
+    "instructions": "Match all strings case-insensitively using wildcard operators"
+  },
+  {
+    "question": "What are the names of the restaurants that serve Italian food?",
+    "query": "SELECT restaurant.name FROM restaurant WHERE LOWER(restaurant.food_type) ILIKE '%italian%';",
+    "answer": "The Pasta House; The Pizza Place",
+    "dataset": "restaurants",
+    "category": "instruct",
+    "instructions": "Match all strings case-insensitively using wildcard operators"
+  },
+  {
+    "question": "What are the names of the restaurants in Los Angeles that have a rating higher than 4?",
+    "query": "SELECT DISTINCT restaurant.name FROM restaurant WHERE restaurant.city_name ILIKE '%Los Angeles%' AND restaurant.rating > 4 ORDER BY restaurant.name NULLS LAST;",
+    "answer": "The Pasta House; The Sushi Bar",
+    "dataset": "restaurants",
+    "category": "instruct",
+    "instructions": "Match all strings case-insensitively using wildcard operators"
+  },
+  {
+    "question": "What is the total number of papers published per year?",
+    "query": "SELECT paper.year, COUNT(paper.paperid) AS total_papers FROM paper GROUP BY paper.year ORDER BY paper.year NULLS LAST;",
+    "answer": "2019, 2; 2020, 3",
+    "dataset": "scholar",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of papers published in each year?",
+    "query": "SELECT paper.year, COUNT(paper.paperid) AS total_papers FROM paper GROUP BY paper.year ORDER BY paper.year;",
+    "answer": "2019, 2; 2020, 3",
+    "dataset": "scholar",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of papers associated with each dataset?",
+    "query": "SELECT paperdataset.datasetid, COUNT(DISTINCT paperdataset.paperid) AS total_papers FROM paperdataset GROUP BY paperdataset.datasetid;SELECT dataset.datasetname, COUNT(paperdataset.paperid) AS total_papers FROM paperdataset JOIN dataset ON paperdataset.datasetid = dataset.datasetid GROUP BY dataset.datasetname;",
+    "answer": "Machine Learning Datasets, 2; Climate Change Data, 2; COVID-19 Research, 1; Social Media Analysis, 1",
+    "dataset": "scholar",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "How many keyphrases are associated with each paper?",
+    "query": "SELECT paperkeyphrase.paperid, COUNT(paperkeyphrase.keyphraseid) AS keyphrase_count FROM paperkeyphrase GROUP BY paperkeyphrase.paperid ORDER BY keyphrase_count DESC NULLS LAST;SELECT p.title, COUNT(pk.keyphraseid) AS num_keyphrases FROM paper p JOIN paperkeyphrase pk ON p.paperid = pk.paperid GROUP BY p.title ORDER BY num_keyphrases DESC NULLS LAST;",
+    "answer": "Machine Learning in Tackling Climate Change, 2; Social Media and Mental Health, 2; COVID-19 Impact on Society, 1; A Study on Machine Learning Algorithms, 1; The Effects of Climate Change on Agriculture, 1",
+    "dataset": "scholar",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "How many authors have published more than 2 papers?",
+    "query": "SELECT COUNT(*) AS number_of_authors FROM (SELECT writes.authorid FROM writes GROUP BY writes.authorid HAVING COUNT(writes.paperid) > 2) AS subquery;",
+    "answer": "2",
+    "dataset": "scholar",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "Which papers have the highest number of authors, ordered by the number of authors in descending order?",
+    "query": "SELECT paper.paperid, paper.title, COUNT(DISTINCT writes.authorid) AS num_authors FROM paper JOIN writes ON paper.paperid = writes.paperid GROUP BY paper.paperid, paper.title ORDER BY num_authors DESC",
+    "answer": "2, The Effects of Climate Change on Agriculture, 6; 4, COVID-19 Impact on Society, 4; 1, A Study on Machine Learning Algorithms, 3; 5, Machine Learning in Tackling Climate Change, 2; 3, Social Media and Mental Health, 1",
+    "dataset": "scholar",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of keyphrases associated with each paper, ordered by the paper ID in ascending order?",
+    "query": "SELECT paperkeyphrase.paperid, COUNT(paperkeyphrase.keyphraseid) AS total_keyphrases FROM paperkeyphrase GROUP BY paperkeyphrase.paperid ORDER BY paperkeyphrase.paperid ASC NULLS LAST;",
+    "answer": "1, 1; 2, 1; 3, 2; 4, 1; 5, 2",
+    "dataset": "scholar",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What are the titles of the papers published in the year 2020, ordered alphabetically?",
+    "query": "SELECT paper.title FROM paper WHERE paper.year = 2020 ORDER BY paper.title ASC NULLS LAST;",
+    "answer": "A Study on Machine Learning Algorithms; COVID-19 Impact on Society; The Effects of Climate Change on Agriculture",
+    "dataset": "scholar",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What are the names of the journals in the database, ordered by the length of the journal name from shortest to longest?",
+    "query": "SELECT journal.journalname FROM journal ORDER BY LENGTH(journal.journalname) ASC NULLS LAST;",
+    "answer": "Nature; Science; International Journal of Mental Health; IEEE Transactions on Pattern Analysis and Machine Intelligence",
+    "dataset": "scholar",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "For each paper that cites other papers, how many other papers does it cite? Sort by the number of papers cited in descending order",
+    "query": "SELECT cite.citingpaperid, COUNT(*) AS citation_count FROM cite GROUP BY cite.citingpaperid ORDER BY citation_count DESC NULLS LAST;SELECT p.paperid, p.numciting FROM paper p WHERE p.numciting > 0 ORDER BY p.numciting DESC;SELECT p.title, COUNT(c.citedpaperid) AS num_cited_papers FROM paper p JOIN cite c ON p.paperid = c.citingpaperid GROUP BY p.title ORDER BY num_cited_papers DESC;",
+    "answer": "Social Media and Mental Health, 3; COVID-19 Impact on Society, 2; A Study on Machine Learning Algorithms, 2; The Effects of Climate Change on Agriculture, 1; Machine Learning in Tackling Climate Change, 1",
+    "dataset": "scholar",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of papers that have more than 1 keyphrases to papers that have 1 keyphrase?",
+    "query": "SELECT CAST(COUNT(DISTINCT CASE WHEN keyphrase_count > 1 THEN subquery.paperid END) AS FLOAT) / NULLIF(COUNT(DISTINCT CASE WHEN keyphrase_count =1 THEN subquery.paperid END), 0) AS ratio FROM (SELECT paperkeyphrase.paperid, COUNT(paperkeyphrase.keyphraseid) AS keyphrase_count FROM paperkeyphrase GROUP BY paperkeyphrase.paperid) AS subquery;",
+    "answer": "0.6666666666666666",
+    "dataset": "scholar",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of papers that have been cited by 2 or more papers to papers that have been cited by less than 2 papers?",
+    "query": "SELECT CAST(COUNT(CASE WHEN paper.numcitedby > 1 THEN 1 END) AS FLOAT) / NULLIF(COUNT(CASE WHEN paper.numcitedby < 2 THEN 1 END), 0) AS ratio FROM paper;",
+    "answer": "4.0",
+    "dataset": "scholar",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of papers published in the year 2020 to the total number of papers in the database?",
+    "query": "SELECT CAST(COUNT(CASE WHEN paper.year = 2020 THEN 1 END) AS FLOAT) / NULLIF(COUNT(paper.paperid), 0) AS ratio FROM paper;",
+    "answer": "0.6",
+    "dataset": "scholar",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of authors who have written 3 or more papers to authors who have written less than 3 papers?",
+    "query": "SELECT CAST(COUNT(DISTINCT CASE WHEN paper_count >= 3 THEN subquery.authorid END) AS FLOAT) / NULLIF(COUNT(DISTINCT CASE WHEN paper_count < 3 THEN subquery.authorid END), 0) AS ratio FROM (SELECT writes.authorid, COUNT(writes.paperid) AS paper_count FROM writes GROUP BY writes.authorid) AS subquery;",
+    "answer": "0.2857142857142857",
+    "dataset": "scholar",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the proportion of papers that belong to more than 1 dataset to papers that belong to 1 dataset?",
+    "query": "SELECT CAST(COUNT(CASE WHEN dataset_count > 1 THEN 1 END) AS FLOAT) / NULLIF(COUNT(CASE WHEN dataset_count = 1 THEN 1 END), 0) AS ratio FROM (SELECT paperdataset.paperid, COUNT(paperdataset.datasetid) AS dataset_count FROM paperdataset GROUP BY paperdataset.paperid) AS subquery;",
+    "answer": "0.25",
+    "dataset": "scholar",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "Which papers are associated with the keyphrase \"Machine Learning\"?",
+    "query": "SELECT paper.title, paper.paperid FROM paper JOIN paperkeyphrase ON paper.paperid = paperkeyphrase.paperid JOIN keyphrase ON paperkeyphrase.keyphraseid = keyphrase.keyphraseid WHERE keyphrase.keyphrasename ILIKE '%Machine Learning%'",
+    "answer": "A Study on Machine Learning Algorithms, 1; Machine Learning in Tackling Climate Change, 5",
+    "dataset": "scholar",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "Which authors have published the most papers, ordered by the number of papers they have published in descending order?",
+    "query": "SELECT author.authorname, author.authorid, COUNT(DISTINCT writes.paperid) AS number_of_papers FROM author JOIN writes ON author.authorid = writes.authorid GROUP BY author.authorname, author.authorid ORDER BY number_of_papers DESC NULLS LAST",
+    "answer": "Michael Brown, 3, 4; John Smith, 1, 3; David Wilson, 5, 2; Sarah Davis, 4, 2; Emily Johnson, 2, 1; Jennifer Lee, 6, 1; Robert Moore, 7, 1; Linda Taylor, 8, 1; William Anderson, 9, 1",
+    "dataset": "scholar",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of unique keyphrases associated with papers published in the journal with \"IEEE Transactions\" in its name?",
+    "query": "SELECT COUNT(DISTINCT paperkeyphrase.keyphraseid) AS total_keyphrases FROM paper JOIN journal ON paper.journalid = journal.journalid JOIN paperkeyphrase ON paper.paperid = paperkeyphrase.paperid WHERE journal.journalname ILIKE '%IEEE Transactions%';",
+    "answer": "2",
+    "dataset": "scholar",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of papers published in each journal, ordered by the journal name?",
+    "query": "SELECT journal.journalname, COUNT(DISTINCT paper.paperid) AS total_papers FROM paper JOIN journal ON paper.journalid = journal.journalid GROUP BY journal.journalname ORDER BY journal.journalname NULLS LAST;",
+    "answer": "IEEE Transactions on Pattern Analysis and Machine Intelligence, 2; International Journal of Mental Health, 1; Nature, 1; Science, 1",
+    "dataset": "scholar",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "How many papers cite each paper in the dataset named \"COVID-19 Research\"?",
+    "query": "SELECT paperdataset.paperid, COUNT(cite.citedpaperid) AS citation_count FROM paperdataset JOIN cite ON paperdataset.paperid = cite.citedpaperid WHERE paperdataset.datasetid = (SELECT datasetid FROM dataset WHERE datasetname ILIKE '%COVID-19 Research%') GROUP BY paperdataset.paperid ORDER BY citation_count DESC;SELECT p.title, COUNT(c.citingpaperid) AS num_citing_papers FROM paper p JOIN paperdataset pd ON p.paperid = pd.paperid JOIN cite c ON p.paperid = c.citedpaperid JOIN dataset d ON pd.datasetid = d.datasetid WHERE d.datasetname = 'COVID-19 Research' GROUP BY p.title ORDER BY num_citing_papers DESC NULLS LAST;",
+    "answer": "COVID-19 Impact on Society, 2",
+    "dataset": "scholar",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "What is the name of the venue where the paper with paper ID 2 was published, and how many papers were published in total in that venue?",
+    "query": "SELECT venue.venuename, COUNT(DISTINCT paper.paperid) FROM paper JOIN venue ON paper.venueid = venue.venueid WHERE paper.venueid = (SELECT venueid FROM paper WHERE paperid = 2 ) GROUP BY venue.venuename;",
+    "answer": "Conference on Machine Learning, 3",
+    "dataset": "scholar",
+    "category": "instruct",
+    "instructions": "Always filter strings using ILIKE"
+  },
+  {
+    "question": "What are the names of the authors who wrote the paper with the title \"The Effects of Climate Change on Agriculture\"?",
+    "query": "SELECT author.authorname FROM author JOIN writes ON author.authorid = writes.authorid JOIN paper ON writes.paperid = paper.paperid WHERE paper.title = 'The Effects of Climate Change on Agriculture';",
+    "answer": "John Smith; Emily Johnson; Michael Brown; Robert Moore; Linda Taylor; William Anderson",
+    "dataset": "scholar",
+    "category": "instruct",
+    "instructions": "Always filter strings with an exact match"
+  },
+  {
+    "question": "How many papers were published in the journal \"nature\" in the year 2020?",
+    "query": "SELECT COUNT(paper.paperid) FROM paper JOIN journal ON paper.journalid = journal.journalid WHERE paper.year = 2020 AND journal.journalname ILIKE '%nature%';",
+    "answer": "1",
+    "dataset": "scholar",
+    "category": "instruct",
+    "instructions": "Filter strings with case-insensitive matching"
+  },
+  {
+    "question": "How many papers are associated with the keyphrase \"machine learning\" and were published in the journal named \"IEEE Transactions on Pattern Analysis and Machine Intelligence\"?",
+    "query": "SELECT COUNT(DISTINCT paper.paperid) FROM paper JOIN journal ON paper.journalid = journal.journalid JOIN paperkeyphrase ON paper.paperid = paperkeyphrase.paperid JOIN keyphrase ON paperkeyphrase.keyphraseid = keyphrase.keyphraseid WHERE keyphrase.keyphrasename ILIKE '%machine learning%' AND journal.journalname = 'IEEE Transactions on Pattern Analysis and Machine Intelligence';",
+    "answer": "2",
+    "dataset": "scholar",
+    "category": "instruct",
+    "instructions": "Filter paper names, journal names, using exact matches. Filter keyphrases with case-insensitive matching."
+  },
+  {
+    "question": "How many authors wrote papers that were published in the journal \"Science\" in the year 2020?",
+    "query": "SELECT COUNT(DISTINCT writes.authorid) AS number_of_authors FROM writes JOIN paper ON writes.paperid = paper.paperid JOIN journal ON paper.journalid = journal.journalid WHERE journal.journalname ILIKE '%Science%' AND paper.year = 2020;",
+    "answer": "4",
+    "dataset": "scholar",
+    "category": "instruct",
+    "instructions": "Filter paper names using exact matches. Filter keyphrases and journal names with case-insensitive matching."
+  },
+  {
+    "question": "How many reviews were written for businesses located in California in the last 10 calendar months (not including the current month)?",
+    "query": "SELECT count(*) AS review_count FROM review r JOIN business b ON r.business_id = b.business_id WHERE b.state = 'CA' AND (r.year * 12 + extract(MONTH FROM to_date(r.month, 'Month'))) >= (extract(YEAR FROM CURRENT_DATE) * 12 + extract(MONTH FROM CURRENT_DATE) - 10);",
+    "answer": "2",
+    "dataset": "yelp",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of check-ins on the 2 days before Saturday?",
+    "query": "SELECT sum(COUNT) AS total_checkins FROM checkin WHERE DAY IN ('Thursday', 'Friday') ;",
+    "answer": "87",
+    "dataset": "yelp",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "How many reviews were there 2 months before the review with id 3?",
+    "query": "SELECT COUNT(*) AS review_count FROM review WHERE TO_DATE(CAST(review.year AS TEXT) || '-' || CASE review.month WHEN 'January' THEN '01' WHEN 'February' THEN '02' WHEN 'March' THEN '03' WHEN 'April' THEN '04' WHEN 'May' THEN '05' WHEN 'June' THEN '06' WHEN 'July' THEN '07' WHEN 'August' THEN '08' WHEN 'September' THEN '09' WHEN 'October' THEN '10' WHEN 'November' THEN '11' WHEN 'December' THEN '12' END || '-01', 'YYYY-MM-DD') = (SELECT TO_DATE(CAST(r.year AS TEXT) || '-' || CASE r.month WHEN 'January' THEN '01' WHEN 'February' THEN '02' WHEN 'March' THEN '03' WHEN 'April' THEN '04' WHEN 'May' THEN '05' WHEN 'June' THEN '06' WHEN 'July' THEN '07' WHEN 'August' THEN '08' WHEN 'September' THEN '09' WHEN 'October' THEN '10' WHEN 'November' THEN '11' WHEN 'December' THEN '12' END || '-01', 'YYYY-MM-DD') - INTERVAL '2 months' FROM review r WHERE r.rid = 3);",
+    "answer": "2",
+    "dataset": "yelp",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "What was the message that came with the tip made exactly 2 months after March 2021?",
+    "query": "SELECT text AS message FROM tip WHERE MONTH ILIKE '%May%' AND YEAR = 2021 LIMIT 1;",
+    "answer": "Their pastries are to die for.",
+    "dataset": "yelp",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "How many months between June 2021 and December 2021 had reviews?",
+    "query": "SELECT COUNT(DISTINCT MONTH) AS num_months FROM review WHERE YEAR = 2021 AND CASE MONTH WHEN 'January' THEN 1 WHEN 'February' THEN 2 WHEN 'March' THEN 3 WHEN 'April' THEN 4 WHEN 'May' THEN 5 WHEN 'June' THEN 6 WHEN 'July' THEN 7 WHEN 'August' THEN 8 WHEN 'September' THEN 9 WHEN 'October' THEN 10 WHEN 'November' THEN 11 WHEN 'December' THEN 12 END BETWEEN 6 AND 12;",
+    "answer": "2",
+    "dataset": "yelp",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "Which neighbourhoods have the highest number of businesses, and how many businesses are located in each neighbourhood?",
+    "query": "SELECT neighbourhood.neighbourhood_name, neighbourhood.id, COUNT(DISTINCT neighbourhood.business_id) AS business_count FROM neighbourhood GROUP BY neighbourhood.neighbourhood_name, neighbourhood.id ORDER BY business_count DESC NULLS LAST",
+    "answer": "Downtown, 1, 1; Downtown, 4, 1; Downtown, 6, 1; Hollywood, 3, 1; Midtown, 2, 1; Midtown, 7, 1; Upper East Side, 5, 1",
+    "dataset": "yelp",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of check-ins for each day of the week for the business with ID \"abc123\"?",
+    "query": "SELECT checkin.day, SUM(checkin.count) AS total_checkins FROM checkin WHERE checkin.business_id = 'abc123' GROUP BY checkin.day ORDER BY total_checkins DESC NULLS LAST;",
+    "answer": "Tuesday, 13; Monday, 10",
+    "dataset": "yelp",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total count of check-ins for each business id?",
+    "query": "SELECT checkin.business_id, SUM(checkin.count) AS total_checkins FROM checkin GROUP BY checkin.business_id ORDER BY total_checkins DESC NULLS LAST;",
+    "answer": "jkl012, 51; mno345, 49; def456, 34; ghi789, 23; abc123, 23; xyz123, 10; uvw456, 2",
+    "dataset": "yelp",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "Return the name and average rating for each business in new york",
+    "query": "SELECT business.name, AVG(review.rating) AS average_rating FROM business JOIN review ON business.business_id = review.business_id WHERE business.city ILIKE '%NEW YORK%' GROUP BY business.name;",
+    "answer": "Lily’s Bakery, 4.599999904632568; Peter’s Cafe, 3.774999976158142; Sashays Cafe, 4.0",
+    "dataset": "yelp",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "How many check-ins occurred on each day of the week?",
+    "query": "SELECT checkin.day, SUM(checkin.count) AS total_checkins FROM checkin GROUP BY checkin.day ORDER BY total_checkins DESC NULLS LAST;",
+    "answer": "Friday, 49; Thursday, 38; Tuesday, 33; Saturday, 31; Wednesday, 29; Monday, 12",
+    "dataset": "yelp",
+    "category": "group_by",
+    "instructions": ""
+  },
+  {
+    "question": "Please provide a list of business names in New York and their average ratings ordered by the highest average rating first.",
+    "query": "SELECT business.name, AVG(review.rating) AS average_rating FROM business JOIN review ON business.business_id = review.business_id WHERE business.city ILIKE '%New York%' GROUP BY business.name, business.business_id ORDER BY average_rating DESC NULLS LAST;",
+    "answer": "Lily’s Bakery, 4.599999904632568; Sashays Cafe, 4.0; Peter’s Cafe, 3.774999976158142",
+    "dataset": "yelp",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the latitude and longitude of the business with the highest rating?",
+    "query": "SELECT business.latitude, business.longitude FROM business JOIN review ON business.business_id = review.business_id GROUP BY business.business_id, business.latitude, business.longitude ORDER BY AVG(review.rating) DESC LIMIT 1;",
+    "answer": "37.7749295, -122.4194155",
+    "dataset": "yelp",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What are the top 3 businesses in terms of review count?",
+    "query": "SELECT business.name, business.business_id, business.bid, business.review_count FROM business ORDER BY business.review_count DESC NULLS LAST LIMIT 3",
+    "answer": "Anna’s Diner, ghi789, 3, 5; Peter’s Cafe, def456, 2, 4; Mark’s Bistro, jkl012, 4, 4",
+    "dataset": "yelp",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What are the names of the businesses in the database, ordered alphabetically?",
+    "query": "SELECT business.name FROM business ORDER BY business.name ASC NULLS LAST;",
+    "answer": "Anna’s Diner; Izza’s Pizza; Joe’s Pizza; Lily’s Bakery; Mark’s Bistro; Peter’s Cafe; Sashays Cafe",
+    "dataset": "yelp",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "How many reviews were posted in each month of the year 2021, ordered by the month?",
+    "query": "SELECT review.month, COUNT(review.rid) AS review_count FROM review WHERE review.year = 2021 GROUP BY review.month ORDER BY TO_DATE(review.month, 'Month') NULLS LAST;",
+    "answer": "January, 2; February, 1; March, 1; April, 2; May, 1; June, 1; July, 1",
+    "dataset": "yelp",
+    "category": "order_by",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of the number of businesses in each state to the total number of businesses in the database?",
+    "query": "SELECT business.state, COUNT(business.business_id) / NULLIF(CAST((SELECT COUNT(*) FROM business) AS FLOAT), 0) AS ratio FROM business GROUP BY business.state;",
+    "answer": "NY, 0.42857142857142855; CA, 0.5714285714285714",
+    "dataset": "yelp",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of open businesses to closed businesses in the city of San Francisco?",
+    "query": "SELECT CAST(SUM(CASE WHEN business.is_open = 1 THEN 1 ELSE 0 END) AS FLOAT) / NULLIF(SUM(CASE WHEN business.is_open = 0 THEN 1 ELSE 0 END), 0) AS ratio FROM business WHERE LOWER(business.city) ILIKE '%san francisco%';",
+    "answer": "2.0",
+    "dataset": "yelp",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of check-ins on weekends to check-ins on weekdays for the business named \"Mark’s Bistro\"?",
+    "query": "SELECT CAST(SUM(CASE WHEN checkin.day IN ('Saturday', 'Sunday') THEN checkin.count ELSE 0 END) AS FLOAT) / NULLIF(SUM(CASE WHEN checkin.day NOT IN ('Saturday', 'Sunday') THEN checkin.count ELSE 0 END), 0) AS ratio FROM checkin JOIN business ON checkin.business_id = business.business_id WHERE business.name ILIKE '%Mark’s Bistro%';",
+    "answer": "0.7",
+    "dataset": "yelp",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "What is the ratio of businesses in the state of California to businesses in the state of New York?",
+    "query": "SELECT CAST(COUNT(CASE WHEN business.state = 'CA' THEN 1 END) AS FLOAT) / NULLIF(COUNT(CASE WHEN business.state = 'NY' THEN 1 END), 0) AS ratio FROM business;",
+    "answer": "1.3333333333333333",
+    "dataset": "yelp",
+    "category": "ratio",
+    "instructions": ""
+  },
+  {
+    "question": "Which users have posted reviews for businesses located in the neighbourhood of \"Downtown\" and how many reviews have they posted?",
+    "query": "SELECT users.name, users.user_id, COUNT(review.rid) AS review_count FROM review JOIN neighbourhood ON review.business_id = neighbourhood.business_id JOIN users ON review.user_id = users.user_id WHERE neighbourhood.neighbourhood_name ILIKE '%Downtown%' GROUP BY users.name, users.user_id ORDER BY review_count DESC NULLS LAST",
+    "answer": "David Johnson, 3, 3; John Doe, 1, 2; Michael Brown, 5, 2; Sarah Williams, 4, 2",
+    "dataset": "yelp",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of reviews for each category in the state of \"California\"?",
+    "query": "SELECT category.category_name, category.id, SUM(business.review_count) AS total_reviews FROM business JOIN category ON business.business_id = category.business_id WHERE business.state = 'CA' GROUP BY category.category_name, category.id ORDER BY total_reviews DESC NULLS LAST",
+    "answer": "Diner, 3, 5; Pizza, 1, 5; Bistro, 4, 4",
+    "dataset": "yelp",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of reviews for each business category?",
+    "query": "SELECT category.category_name, category.id, SUM(business.review_count) AS total_reviews FROM business JOIN category ON business.business_id = category.business_id GROUP BY category.category_name, category.id ORDER BY total_reviews DESC NULLS LAST",
+    "answer": "Cafe, 2, 6; Diner, 3, 5; Pizza, 1, 5; Bistro, 4, 4; Bakery, 5, 3",
+    "dataset": "yelp",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of check-ins for each business in the state of California?",
+    "query": "SELECT business.business_id, business.name, business.bid, SUM(checkin.count) AS total_checkins FROM business JOIN checkin ON business.business_id = checkin.business_id WHERE business.state = 'CA' GROUP BY business.business_id, business.name, business.bid ORDER BY total_checkins DESC NULLS LAST",
+    "answer": "jkl012, Mark’s Bistro, 4, 51; abc123, Joe’s Pizza, 1, 23; ghi789, Anna’s Diner, 3, 23; xyz123, Izza’s Pizza, 6, 10",
+    "dataset": "yelp",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "What are the top 2 categories of businesses with the highest average rating?",
+    "query": "SELECT category.category_name, category.id FROM (SELECT business.business_id, AVG(review.rating) AS average_rating FROM business JOIN review ON business.business_id = review.business_id GROUP BY business.business_id) AS business_rating JOIN category ON business_rating.business_id = category.business_id GROUP BY category.category_name, category.id ORDER BY AVG(business_rating.average_rating) DESC NULLS LAST LIMIT 2",
+    "answer": "Bistro, 4; Bakery, 5",
+    "dataset": "yelp",
+    "category": "table_join",
+    "instructions": ""
+  },
+  {
+    "question": "What is the total number of reviews posted in the year 2021 for businesses in the category \"Cafe\"?",
+    "query": "SELECT COUNT(review.rid) AS total_reviews FROM review JOIN category ON review.business_id = category.business_id WHERE review.year = 2021 AND category.category_name ILIKE '%Cafe%';",
+    "answer": "3",
+    "dataset": "yelp",
+    "category": "instruct",
+    "instructions": "Filter strings of users, city, address, business.name using ILIKE with wildcards.\nFilter strings of state using exact upper case matches.\nAssume the rating of a business to be its average rating, and compute it before computing other aggregates on it.\n"
+  },
+  {
+    "question": "What is the average rating of businesses in the city of San Francisco?",
+    "query": "SELECT AVG(sf.average_rating) AS sf_average_rating FROM (SELECT business.business_id, AVG(review.rating) AS average_rating FROM business JOIN review ON business.business_id = review.business_id WHERE LOWER(business.city) ILIKE '%san francisco%' GROUP BY business.business_id) AS sf;",
+    "answer": "3.780555566151937",
+    "dataset": "yelp",
+    "category": "instruct",
+    "instructions": "Filter strings of users, city, address, business.name using ILIKE with wildcards.\nFilter strings of state using exact upper case matches.\nThe rating of businesses in a city refers to the average rating of the businesses in that city. I.e., you must compute the average rating of each business before computing the average rating of businesses in the city.\n"
+  },
+  {
+    "question": "How many reviews were posted for each business id in the year 2021?",
+    "query": "SELECT review.business_id, COUNT(*) AS review_count FROM review WHERE review.year = 2021 GROUP BY review.business_id ORDER BY review_count DESC NULLS LAST;",
+    "answer": "def456, 2; ghi789, 2; mno345, 1; uvw456, 1; xyz123, 1; jkl012, 1; abc123, 1",
+    "dataset": "yelp",
+    "category": "instruct",
+    "instructions": "Filter strings of users, city, address, business.name using ILIKE with wildcards.\nFilter strings of state using exact upper case matches.\nAssume the rating of a business to be its average rating, and compute it before computing other aggregates on it.\n"
+  },
+  {
+    "question": "How many reviews were posted by users with the name \"Sarah Williams\" in the month of April 2021?",
+    "query": "SELECT COUNT(*) FROM review JOIN users ON review.user_id = users.user_id WHERE users.name ILIKE '%Sarah Williams%' AND review.month = 'April' AND review.year = 2021;",
+    "answer": "1",
+    "dataset": "yelp",
+    "category": "instruct",
+    "instructions": "Filter strings of users, city, address, business.name using ILIKE with wildcards.\nFilter strings of state using exact upper case matches.\nAssume the rating of a business to be its average rating, and compute it before computing other aggregates on it.\n"
+  },
+  {
+    "question": "How many check-ins occurred on Mondays at businesses in the state of California?",
+    "query": "SELECT SUM(checkin.count) AS total_checkins FROM business JOIN checkin ON business.business_id = checkin.business_id WHERE business.state = 'CA' AND checkin.day ILIKE '%Monday%';",
+    "answer": "10",
+    "dataset": "yelp",
+    "category": "instruct",
+    "instructions": "Filter strings of users, city, address, business.name using ILIKE with wildcards.\nFilter strings of state using exact upper case matches.\nAssume the rating of a business to be its average rating, and compute it before computing other aggregates on it.\n"
+  },
+  {
+    "question": "Return the customer who made the most sell transactions on 2023-04-01. Return the id, name and number of transactions.",
+    "query": "WITH SellTransactions AS (SELECT sbTxCustId, COUNT(*) AS num_tx FROM sbTransaction WHERE sbTxDateTime::date = '2023-04-01' AND sbTxType = 'sell' GROUP BY sbTxCustId) SELECT c.sbCustId, c.sbCustName, st.num_tx FROM sbCustomer c JOIN SellTransactions st ON c.sbCustId = st.sbTxCustId ORDER BY st.num_tx DESC LIMIT 1;",
+    "answer": "C002, Jane Smith, 3",
+    "dataset": "broker",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "What is the monthly average transaction price for successful transactions in the 1st quarter of 2023?",
+    "query": "SELECT DATE_TRUNC('month', sbTxDateTime) AS MONTH, AVG(sbTxPrice) AS avg_price FROM sbTransaction WHERE sbTxStatus = 'success' AND sbTxDateTime BETWEEN '2023-01-01' AND '2023-03-31' GROUP BY MONTH ORDER BY MONTH;SELECT TO_CHAR(sbTxDateTime, 'YYYY-MM') AS MONTH, AVG(sbTxPrice) AS average_transaction_price FROM sbTransaction WHERE sbTxStatus = 'success' AND sbTxDateTime >= '2023-01-01' AND sbTxDateTime < '2023-04-01' GROUP BY TO_CHAR(sbTxDateTime, 'YYYY-MM') ORDER BY MONTH;",
+    "answer": "2023-01, 166.6666666666666667; 2023-02, 1417.5000000000000000; 2023-03, 1730.0000000000000000",
+    "dataset": "broker",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "Lowest daily closest price for symbol `VTI` in the past 7 days",
+    "query": "SELECT MIN(sdp.sbDpClose) AS lowest_price FROM sbDailyPrice AS sdp JOIN sbTicker AS st ON sdp.sbDpTickerId = st.sbTickerId WHERE st.sbTickerSymbol = 'VTI' AND sdp.sbDpDate >= CURRENT_DATE - INTERVAL '7 days';",
+    "answer": "None",
+    "dataset": "broker",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "Return the customer id and the difference between their time from joining to their first transaction. Ignore customers who haven't made any transactions.",
+    "query": "SELECT c.sbCustId, MIN(t.sbTxDateTime) - c.sbCustJoinDate AS DaysFromJoinToFirstTransaction FROM sbCustomer c JOIN sbTransaction t ON c.sbCustId = t.sbTxCustId GROUP BY c.sbCustId;SELECT c.sbCustId, age(MIN(t.sbTxDateTime), c.sbCustJoinDate) AS time_difference FROM sbCustomer c JOIN sbTransaction t ON c.sbCustId = t.sbTxCustId GROUP BY c.sbCustId, c.sbCustJoinDate;SELECT c.sbCustId, MIN(DATE(t.sbTxDateTime)) - c.sbCustJoinDate AS days_difference FROM sbCustomer c JOIN sbTransaction t ON c.sbCustId = t.sbTxCustId GROUP BY c.sbCustId, c.sbCustJoinDate;",
+    "answer": "18 records returned",
+    "dataset": "broker",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "number of transactions by users who joined in the past 70 days",
+    "query": "SELECT COUNT(t.sbTxCustId) AS transaction_count FROM sbTransaction t JOIN sbCustomer c ON t.sbTxCustId = c.sbCustId WHERE c.sbCustJoinDate >= CURRENT_DATE - INTERVAL '70' DAY;",
+    "answer": "1",
+    "dataset": "broker",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "Return the treatment id, treatment start date, adverse event date and description of all adverse events that occured within 10 days after starting treatment",
+    "query": "SELECT t.treatment_id, t.start_dt, ae.reported_dt, ae.description FROM adverse_events ae JOIN treatments t ON ae.treatment_id = t.treatment_id WHERE ae.reported_dt BETWEEN t.start_dt AND t.start_dt + INTERVAL '10 days';",
+    "answer": "4, 2022-04-01, 2022-04-10, Severe allergic reaction, hospitalization required; 14, 2023-02-01, 2023-02-05, Mild skin rash",
+    "dataset": "derm_treatment",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "List the last name, year of registration, and first treatment (date and id) by doctors who were registered 2 years ago.",
+    "query": "WITH doc_first_treatment AS (SELECT d.doc_id, d.last_name, d.year_reg, t.treatment_id, t.start_dt, ROW_NUMBER() OVER (PARTITION BY d.doc_id ORDER BY t.start_dt ASC) AS rn FROM doctors d JOIN treatments t ON d.doc_id = t.doc_id WHERE d.year_reg = EXTRACT(YEAR FROM CURRENT_DATE) - 2 ) SELECT last_name, year_reg, start_dt AS first_treatment_date, treatment_id AS first_treatment_id FROM doc_first_treatment WHERE rn = 1;",
+    "answer": "Doe, 2023, 2022-01-01, 1; Smith, 2023, 2022-02-15, 2",
+    "dataset": "derm_treatment",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "what is average age of all registered male patients with private insurance currently?",
+    "query": "SELECT AVG(EXTRACT(YEAR FROM AGE(CURRENT_DATE, date_of_birth))) AS avg_age FROM patients WHERE gender = 'Male' AND ins_type = 'private';",
+    "answer": "41.0000000000000000",
+    "dataset": "derm_treatment",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "show all placebo treatment id, start and end date, where there concomitant_meds were started within 2 weeks of starting the treatment. also return the start and end dates of all concomitant drug usage.",
+    "query": "SELECT t.treatment_id, t.start_dt AS treatment_start_date, t.end_dt AS treatment_end_date, cm.start_dt AS concomitant_med_start_date, cm.end_dt AS concomitant_med_end_date FROM treatments t JOIN concomitant_meds cm ON t.treatment_id = cm.treatment_id WHERE t.is_placebo = TRUE AND TO_DATE(cm.start_dt, 'YYYY-MM-DD') BETWEEN t.start_dt AND t.start_dt + INTERVAL '2 WEEK' ORDER BY t.treatment_id;",
+    "answer": "2, 2022-02-15, 2022-08-14, 2022-02-15, 2022-03-15; 7, 2022-07-01, 2022-12-31, 2022-07-15, 2022-07-21",
+    "dataset": "derm_treatment",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "How many treatments for diagnoses containing 'psoriasis' (match with wildcards case-insensitively) involve drugs that have been FDA-approved and the treatments have ended within the last 6 months from today?",
+    "query": "SELECT COUNT(*) FROM treatments t JOIN diagnoses d ON t.diag_id = d.diag_id JOIN drugs dr ON t.drug_id = dr.drug_id WHERE d.diag_name ILIKE '%psoriasis%' AND dr.fda_appr_dt IS NOT NULL AND t.end_dt >= CURRENT_DATE - INTERVAL '6 months';",
+    "answer": "2",
+    "dataset": "derm_treatment",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "What was the average transaction daily and monthly limit for the earliest setting snapshot in 2023?",
+    "query": "SELECT AVG(tx_limit_daily) AS avg_daily_limit, AVG(tx_limit_monthly) AS avg_monthly_limit FROM consumer_div.user_setting_snapshot WHERE snapshot_date = (SELECT MIN(snapshot_date) FROM consumer_div.user_setting_snapshot WHERE snapshot_date >= '2023-01-01' AND snapshot_date < '2024-01-01' );",
+    "answer": "501.0000000000000000, 1750.0000000000000000",
+    "dataset": "ewallet",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "Which users did not get a notification within the first year of signing up? Return their usernames, emails and signup dates.",
+    "query": "SELECT u.username, u.email, u.created_at FROM consumer_div.users u LEFT JOIN consumer_div.notifications n ON u.uid = n.user_id AND n.created_at BETWEEN u.created_at AND u.created_at + INTERVAL '1 year' WHERE n.user_id IS NULL;",
+    "answer": "lisa_jones, lisa.jones@email.com, 2023-09-05 15:20:00; huang2143, huang2143@example.com, 2023-12-10 08:00:00; emily_wilson, emily.w@gmail.com, 2021-11-03 22:10:00; michael_brown, mike.brown@outlook.com, 2019-07-22 16:40:00; techcorp, orders@techcorp.com, 2018-05-20 11:35:00; bizuser, contact@business.co, 2021-06-01 09:15:00; shopsmart, customerserv@shopsmart.biz, 2020-09-15 06:25:00",
+    "dataset": "ewallet",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "what was the average user session duration in seconds split by device_type?",
+    "query": "SELECT device_type, AVG(EXTRACT(EPOCH FROM (session_end_ts - session_start_ts))) AS avg_session_duration_seconds FROM consumer_div.user_sessions WHERE session_end_ts IS NOT NULL GROUP BY device_type;",
+    "answer": "web_app, 1351.3333333333333333; mobile_app, 1765.8750000000000000",
+    "dataset": "ewallet",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "Give me today's median merchant wallet balance for all active merchants whose category contains 'retail'",
+    "query": "WITH retail_merchants AS (SELECT mid FROM consumer_div.merchants WHERE category ILIKE '%retail%' AND status = 'active' ), merchant_balances AS (SELECT balance FROM consumer_div.wallet_merchant_balance_daily wmbd JOIN retail_merchants rm ON wmbd.merchant_id = rm.mid WHERE DATE(wmbd.updated_at) = CURRENT_DATE ) SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY balance) AS median_balance FROM merchant_balances;",
+    "answer": "None",
+    "dataset": "ewallet",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "Which merchants earliest coupon start date was within a year of the merchant's registration? Return the merchant id, registration date, and earliest coupon id and start date",
+    "query": "WITH earliest_coupons AS (SELECT c.merchant_id, MIN(c.start_date) AS earliest_coupon_start_date FROM consumer_div.coupons c GROUP BY c.merchant_id) SELECT m.mid AS merchant_id, m.created_at AS merchant_registration_date, ec.earliest_coupon_start_date, c.cid AS earliest_coupon_id FROM consumer_div.merchants m JOIN earliest_coupons ec ON m.mid = ec.merchant_id JOIN consumer_div.coupons c ON ec.merchant_id = c.merchant_id AND ec.earliest_coupon_start_date = c.start_date WHERE ec.earliest_coupon_start_date <= m.created_at + INTERVAL '1 year';",
+    "answer": "5, 2022-06-20 00:00:00, 2023-04-01, 5; 10, 2023-02-01 00:00:00, 2023-03-01, 10",
+    "dataset": "ewallet",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "Return the name and phone number of the salesperson with the shortest time from being hired to getting fired. Return the number of days he/she was employed for.",
+    "query": "SELECT s.first_name, s.last_name, s.phone, s.termination_date - s.hire_date AS days_employed FROM salespersons s ORDER BY days_employed ASC LIMIT 1;SELECT first_name || ' ' || last_name AS name, phone, (termination_date - hire_date) AS days_employed FROM salespersons WHERE termination_date IS NOT NULL ORDER BY (termination_date - hire_date) LIMIT 1;",
+    "answer": "Olivia Thomas, (333)-415-0000, 181",
+    "dataset": "car_dealership",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "Return the number of payments made on weekends to the vendor named 'Utility Company'",
+    "query": "SELECT COUNT(*) AS weekend_payments FROM payments_made WHERE vendor_name = 'Utility Company' AND EXTRACT(DOW FROM payment_date) IN (0, 6);",
+    "answer": "1",
+    "dataset": "car_dealership",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "show me the daily total amount of payments received in the whole of the previous ISO week not including the current week, split by the payment_method",
+    "query": "SELECT payment_date, payment_method, SUM(payment_amount) AS total_amount FROM payments_received WHERE payment_date >= DATE_TRUNC('WEEK', CURRENT_DATE) - INTERVAL '1 week' AND payment_date < DATE_TRUNC('WEEK', CURRENT_DATE) GROUP BY payment_date, payment_method ORDER BY payment_date DESC, payment_method ASC;",
+    "answer": "No results",
+    "dataset": "car_dealership",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "Which cars were in inventory in the latest snapshot for march 2023? Return the car id, make, model, and year. Cars are considered to be in inventory\" if is_in_inventory is True.\"",
+    "query": "WITH latest_snapshot AS (SELECT MAX(snapshot_date) AS snapshot_date FROM inventory_snapshots WHERE snapshot_date BETWEEN '2023-03-01' AND '2023-03-31' ), latest_snapshot_data AS (SELECT inv.car_id FROM inventory_snapshots inv JOIN latest_snapshot ls ON inv.snapshot_date = ls.snapshot_date WHERE inv.is_in_inventory = TRUE ) SELECT c.id, c.make, c.model, c.year FROM cars c JOIN latest_snapshot_data lsd ON c.id = lsd.car_id;",
+    "answer": "1, Toyota, Camry, 2022; 3, Ford, Mustang, 2023",
+    "dataset": "car_dealership",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "What were the total quarterly sales in 2023 grouped by customer's state? Represent each quarter as the first date in the quarter.",
+    "query": "SELECT DATE_TRUNC('QUARTER', s.sale_date) AS QUARTER, c.state, SUM(s.sale_price) AS total_sales FROM sales s JOIN customers c ON s.customer_id = c.id WHERE EXTRACT(YEAR FROM s.sale_date) = 2023 GROUP BY c.state, QUARTER HAVING SUM(s.sale_price) > 0 ORDER BY QUARTER, c.state;SELECT c.state, date_trunc('quarter', s.sale_date)::date AS quarter_start, SUM(s.sale_price) AS total_sales FROM sales s JOIN customers c ON s.customer_id = c.id WHERE s.sale_date BETWEEN '2023-01-01' AND '2023-12-31' GROUP BY c.state, date_trunc('quarter', s.sale_date) ORDER BY c.state, quarter_start;",
+    "answer": "AZ, 2023-01-01, 47000.00; CA, 2023-01-01, 26500.00; CA, 2023-04-01, 105500.00; IL, 2023-01-01, 30500.00; NY, 2023-04-01, 30000.00; PA, 2023-04-01, 26800.00; TX, 2023-01-01, 61500.00; TX, 2023-04-01, 44500.00",
+    "dataset": "car_dealership",
+    "category": "date_functions",
+    "instructions": ""
+  },
+  {
+    "question": "Who are the top 5 customers by total transaction amount? Return their name and total amount.",
+    "query": "WITH cust_tx AS (SELECT c.sbCustId, c.sbCustName, SUM(t.sbTxAmount) AS total_amount FROM sbCustomer c JOIN sbTransaction t ON c.sbCustId = t.sbTxCustId GROUP BY c.sbCustId, c.sbCustName) SELECT sbCustName, total_amount FROM cust_tx ORDER BY total_amount DESC LIMIT 5",
+    "answer": "David Kim, 828200.00; Bob Johnson, 529776.00; Jane Smith, 87557.50; john doe, 68993.75; Sarah Nguyen, 56791.25",
+    "dataset": "broker",
+    "category": "instructions_cte_join",
+    "instructions": "To get the total transaction amount per customer, join the customer and transaction tables, group by customer, and sum the transaction amounts."
+  },
+  {
+    "question": "What are the 2 most frequently bought stock ticker symbols in the past 10 days? Return the ticker symbol and number of buy transactions.",
+    "query": "WITH popular_stocks AS (SELECT t.sbTickerSymbol, COUNT(*) AS tx_count FROM sbTransaction tx JOIN sbTicker t ON tx.sbTxTickerId = t.sbTickerId WHERE tx.sbTxType = 'buy' AND tx.sbTxDateTime >= CURRENT_DATE - INTERVAL '10 days' GROUP BY t.sbTickerSymbol) SELECT sbTickerSymbol, tx_count FROM popular_stocks ORDER BY tx_count DESC LIMIT 2",
+    "answer": "No results",
+    "dataset": "broker",
+    "category": "instructions_cte_join",
+    "instructions": "To find the most popular stocks in the past 10 days, join the transaction and ticker tables, filter for buy transactions in the last 10 days, group by ticker and count transactions."
+  },
+  {
+    "question": "For customers with at least 5 total transactions, what is their transaction success rate? Return the customer name and success rate, ordered from lowest to highest success rate.",
+    "query": "WITH cust_tx_stats AS (SELECT c.sbCustId, c.sbCustName, COUNT(t.sbTxId) AS total_tx, SUM(CASE WHEN t.sbTxStatus = 'success' THEN 1 ELSE 0 END) AS success_tx FROM sbCustomer c JOIN sbTransaction t ON c.sbCustId = t.sbTxCustId GROUP BY c.sbCustId, c.sbCustName) SELECT sbCustName, success_tx::float/total_tx * 100 AS success_rate FROM cust_tx_stats WHERE total_tx >= 5 ORDER BY success_rate",
+    "answer": "john doe, 60.0; Jane Smith, 87.5; Bob Johnson, 100.0",
+    "dataset": "broker",
+    "category": "instructions_cte_join",
+    "instructions": "To get the success rate of transactions per customer, join customer and transaction tables, group by customer, and calculate the percentage of successful transactions."
+  },
+  {
+    "question": "Which 3 distinct stocks had the highest price change between the low and high from April 1 2023 to April 4 2023? I want the different in the low and high throughout this timerange, not just the intraday price changes. Return the ticker symbol and price change.",
+    "query": "WITH stock_stats AS (SELECT t.sbTickerSymbol, MIN(d.sbDpLow) AS min_price, MAX(d.sbDpHigh) AS max_price FROM sbDailyPrice d JOIN sbTicker t ON d.sbDpTickerId = t.sbTickerId WHERE d.sbDpDate BETWEEN '2023-04-01' AND '2023-04-04' GROUP BY t.sbTickerSymbol) SELECT sbTickerSymbol, max_price - min_price AS price_change FROM stock_stats ORDER BY price_change DESC LIMIT 3",
+    "answer": "BRK.B, 6000.00; GOOGL, 65.00; AMZN, 60.00",
+    "dataset": "broker",
+    "category": "instructions_cte_join",
+    "instructions": "To analyze stock performance, join the daily price and ticker tables, filter for a specific date range, and calculate price change."
+  },
+  {
+    "question": "What is the ticker symbol, month, average closing price, highest price, lowest price, and MoMC for each ticker by month?",
+    "query": "WITH monthly_price_stats AS (SELECT DATE_TRUNC('month', sbDpDate) AS MONTH, sbDpTickerId, AVG(sbDpClose) AS avg_close, MAX(sbDpHigh) AS max_high, MIN(sbDpLow) AS min_low FROM sbDailyPrice GROUP BY MONTH, sbDpTickerId) SELECT t.sbTickerSymbol, mps.month, mps.avg_close, mps.max_high, mps.min_low, (mps.avg_close - LAG(mps.avg_close) OVER (PARTITION BY mps.sbDpTickerId ORDER BY mps.month)) / LAG(mps.avg_close) OVER (PARTITION BY mps.sbDpTickerId ORDER BY mps.month) AS mom_change FROM monthly_price_stats mps JOIN sbTicker t ON mps.sbDpTickerId = t.sbTickerId;WITH monthly_price_stats AS (SELECT TO_CHAR(DATE_TRUNC('month', sbDpDate), 'YYYY-MM') AS month, sbDpTickerId, AVG(sbDpClose) AS avg_close, MAX(sbDpHigh) AS max_high, MIN(sbDpLow) AS min_low FROM sbDailyPrice GROUP BY TO_CHAR(DATE_TRUNC('month', sbDpDate), 'YYYY-MM'), sbDpTickerId) SELECT t.sbTickerSymbol, mps.month, mps.avg_close, mps.max_high, mps.min_low, (mps.avg_close - LAG(mps.avg_close) OVER (PARTITION BY mps.sbDpTickerId ORDER BY mps.month)) / LAG(mps.avg_close) OVER (PARTITION BY mps.sbDpTickerId ORDER BY mps.month) AS mom_change FROM monthly_price_stats mps JOIN sbTicker t ON mps.sbDpTickerId = t.sbTickerId;WITH monthly_price_stats AS (SELECT TO_CHAR(DATE_TRUNC('month', sbDpDate), 'YYYY-MM-01') AS month, sbDpTickerId, AVG(sbDpClose) AS avg_close, MAX(sbDpHigh) AS max_high, MIN(sbDpLow) AS min_low FROM sbDailyPrice GROUP BY TO_CHAR(DATE_TRUNC('month', sbDpDate), 'YYYY-MM-01'), sbDpTickerId) SELECT t.sbTickerSymbol, mps.month, mps.avg_close, mps.max_high, mps.min_low, (mps.avg_close - LAG(mps.avg_close) OVER (PARTITION BY mps.sbDpTickerId ORDER BY mps.month)) / LAG(mps.avg_close) OVER (PARTITION BY mps.sbDpTickerId ORDER BY mps.month) AS mom_change FROM monthly_price_stats mps JOIN sbTicker t ON mps.sbDpTickerId = t.sbTickerId;",
+    "answer": "13 records returned",
+    "dataset": "broker",
+    "category": "instructions_cte_window",
+    "instructions": "MoMC = month-over-month change in average closing price = (avg_close_given_month - avg_close_previous_month) / avg_close_previous_month for each ticker symbol each month. Recall that we want the symbol, and not just the ticker id."
+  },
+  {
+    "question": "Return the customer name, number of transactions, total transaction amount, and CR for all customers;",
+    "query": "SELECT c.sbCustName, COUNT(t.sbTxId) AS number_of_transactions, COALESCE(SUM(t.sbTxAmount), 0) AS total_transaction_amount, DENSE_RANK() OVER ( ORDER BY COALESCE(SUM(t.sbTxAmount), 0) DESC) AS CR FROM sbCustomer c LEFT JOIN sbTransaction t ON c.sbCustId = t.sbTxCustId GROUP BY c.sbCustName ORDER BY CR;",
+    "answer": "20 records returned",
+    "dataset": "broker",
+    "category": "instructions_cte_window",
+    "instructions": "CR = customer rank by total transaction amount, with rank 1 being the customer with the highest total transaction amount"
+  },
+  {
+    "question": "What are the PMCS and PMAT for customers who signed up in the last 6 months excluding the current month?",
+    "query": "SELECT DATE_TRUNC('month', sbCustJoinDate) AS MONTH, COUNT(sbCustId) AS customer_signups, AVG(t.sbTxAmount) AS avg_tx_amount FROM sbCustomer c LEFT JOIN sbTransaction t ON c.sbCustId = t.sbTxCustId AND DATE_TRUNC('month', t.sbTxDateTime) = DATE_TRUNC('month', c.sbCustJoinDate) WHERE sbCustJoinDate >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '6 months' AND sbCustJoinDate < DATE_TRUNC('month', CURRENT_DATE) GROUP BY MONTH",
+    "answer": "2025-01-01 00:00:00+00:00, 1, 7500.0000000000000000; 2025-02-01 00:00:00+00:00, 1, 11200.0000000000000000; 2025-03-01 00:00:00+00:00, 1, 48000.000000000000; 2025-04-01 00:00:00+00:00, 1, 5400.0000000000000000; 2025-05-01 00:00:00+00:00, 1, 25000.000000000000; 2025-06-01 00:00:00+00:00, 1",
+    "dataset": "broker",
+    "category": "instructions_date_join",
+    "instructions": "PMCS = per month customer signups. PMAT = per month average transaction amount. Truncate date to month for aggregation."
+  },
+  {
+    "question": "How many transactions were made by customers from the USA last week (exclusive of the current week)? Return the number of transactions and total transaction amount.",
+    "query": "SELECT COUNT(sbTxId) AS num_transactions, SUM(sbTxAmount) AS total_amount FROM sbTransaction t JOIN sbCustomer c ON t.sbTxCustId = c.sbCustId WHERE c.sbCustCountry = 'USA' AND t.sbTxDateTime BETWEEN DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 week' AND DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 millisecond'",
+    "answer": "0",
+    "dataset": "broker",
+    "category": "instructions_date_join",
+    "instructions": "Last week = DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 week' to DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 millisecond'. Always join transactions with customers before using the transactions table."
+  },
+  {
+    "question": "How many transactions for stocks occurred in each of the last 8 weeks excluding the current week? How many of these transactions happened on weekends?",
+    "query": "SELECT DATE_TRUNC('week', t.sbTxDateTime) AS WEEK, COUNT(t.sbTxId) AS num_transactions, COUNT(CASE WHEN EXTRACT(dow FROM t.sbTxDateTime) IN (0, 6) THEN 1 END) AS weekend_transactions FROM sbTransaction t JOIN sbTicker tk ON t.sbTxTickerId = tk.sbTickerId WHERE tk.sbTickerType = 'stock' AND t.sbTxDateTime >= DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '8 weeks' AND t.sbTxDateTime < DATE_TRUNC('week', CURRENT_DATE) GROUP BY WEEK",
+    "answer": "2025-05-05 00:00:00, 1, 0; 2025-06-02 00:00:00, 1, 0; 2025-06-09 00:00:00, 2, 2; 2025-06-16 00:00:00, 7, 2",
+    "dataset": "broker",
+    "category": "instructions_date_join",
+    "instructions": "Weekend days are Saturday and Sunday. Truncate date to week for aggregation."
+  },
+  {
+    "question": "Which customer made the highest number of transactions in the same month as they signed up? Return the customer's id, name and number of transactions.",
+    "query": "WITH active_customers AS (SELECT c.sbCustId, COUNT(t.sbTxId) AS num_transactions FROM sbCustomer c JOIN sbTransaction t ON c.sbCustId = t.sbTxCustId AND DATE_TRUNC('month', c.sbCustJoinDate) = DATE_TRUNC('month', t.sbTxDateTime) GROUP BY c.sbCustId) SELECT ac.sbCustId, c.sbCustName, ac.num_transactions FROM active_customers ac JOIN sbCustomer c ON ac.sbCustId = c.sbCustId ORDER BY ac.num_transactions DESC LIMIT 1",
+    "answer": "C012, Olivia Johnson, 3",
+    "dataset": "broker",
+    "category": "instructions_date_join",
+    "instructions": "If transactions from 2 different tables from the same interval are to be joined, join on the respective truncated date fields eg `FROM t1 JOIN t2 ON DATE_TRUNC('<interval>', t1.date)=DATE_TRUNC('<interval>', t2.date)."
+  },
+  {
+    "question": "How many distinct customers with a .com email address bought stocks of FAANG companies (Amazon, Apple, Google, Meta or Netflix)?",
+    "query": "SELECT COUNT(DISTINCT t.sbTxCustId) FROM sbTransaction t JOIN sbCustomer c ON t.sbTxCustId = c.sbCustId JOIN sbTicker tk ON t.sbTxTickerId = tk.sbTickerId WHERE c.sbCustEmail LIKE '%.com' AND tk.sbTickerSymbol ~ '(AMZN|AAPL|GOOGL|META|NFLX)'",
+    "answer": "9",
+    "dataset": "broker",
+    "category": "instructions_string_matching",
+    "instructions": "Customers with a '.com' email address who bought FAANG stocks (ticker symbol contains 'AMZN', 'AAPL', 'GOOGL', 'META' or 'NFLX')"
+  },
+  {
+    "question": "What is the number of customers whose name starts with J or ends with 'ez', and who live in a state ending with the letter 'a'?",
+    "query": "SELECT COUNT(sbCustId) FROM sbCustomer WHERE (LOWER(sbCustName) LIKE 'j%' OR LOWER(sbCustName) LIKE '%ez') AND LOWER(sbCustState) LIKE '%a'",
+    "answer": "2",
+    "dataset": "broker",
+    "category": "instructions_string_matching",
+    "instructions": "all customer attributes should be matched case insensitively"
+  },
+  {
+    "question": "How many TAC are there from each country, for customers who joined on or after January 1, 2023? Return the country and the count.",
+    "query": "SELECT sbCustCountry, COUNT(sbCustId) AS TAC FROM sbCustomer WHERE sbCustJoinDate >= '2023-01-01' GROUP BY sbCustCountry",
+    "answer": "USA, 10",
+    "dataset": "broker",
+    "category": "keywords_aggregate",
+    "instructions": "TAC = Total Active Customers who joined on or after January 1, 2023"
+  },
+  {
+    "question": "What is the ACP for each ticker type in the past 7 days, inclusive of today? Return the ticker type and the average closing price.",
+    "query": "SELECT sbTickerType, AVG(sbDpClose) AS ACP FROM sbDailyPrice JOIN sbTicker ON sbDailyPrice.sbDpTickerId = sbTicker.sbTickerId WHERE sbDpDate >= CURRENT_DATE - INTERVAL '6 days' GROUP BY sbTickerType",
+    "answer": "No results",
+    "dataset": "broker",
+    "category": "keywords_aggregate",
+    "instructions": "ACP = Average Closing Price of tickers in the last 7 days, inclusive of today"
+  },
+  {
+    "question": "What is the AR for each country for customers who joined in 2022? Return the country and AR.",
+    "query": "SELECT c.sbCustCountry,COALESCE(100.0 * COUNT(DISTINCT CASE WHEN c.sbCustStatus = 'active' THEN c.sbCustId END) / NULLIF(COUNT(DISTINCT t.sbTxCustId), 0), 0) AS AR FROM sbCustomer c JOIN sbTransaction t ON c.sbCustId = t.sbTxCustId WHERE c.sbCustJoinDate BETWEEN '2022-01-01' AND '2022-12-31' GROUP BY c.sbCustCountry",
+    "answer": "USA, 50.0000000000000000",
+    "dataset": "broker",
+    "category": "keywords_ratio",
+    "instructions": "AR (Activity Ratio) = (Number of Active Customers with Transactions / Total Number of Customers with Transactions) * 100."
+  },
+  {
+    "question": "What is the SPM for each ticker symbol from sell transactions in the past month, inclusive of 1 month ago? Return the ticker symbol and SPM.",
+    "query": "SELECT sbTickerSymbol, CASE WHEN SUM(sbTxAmount) = 0 THEN NULL ELSE (SUM(sbTxAmount) - SUM(sbTxTax + sbTxCommission)) / SUM(sbTxAmount) * 100 END AS SPM FROM sbTransaction JOIN sbTicker ON sbTransaction.sbTxTickerId = sbTicker.sbTickerId WHERE sbTxType = 'sell' AND sbTxDateTime >= CURRENT_DATE - INTERVAL '1 month' GROUP BY sbTickerSymbol;",
+    "answer": "FB, 99.42857142857142857100; JPM, 99.42857142857142857100; MSFT, 99.42857142857142857100; QQQ, 99.34375000000000000000; TSLA, 99.45833333333333333300; VXUS, 99.40909090909090909100",
+    "dataset": "broker",
+    "category": "keywords_ratio",
+    "instructions": "SPM (Selling Profit Margin) = (Total Amount from Sells - (Tax + Commission)) / Total Amount from Sells * 100"
+  },
+  {
+    "question": "What is the average number of days between the sale date and payment received date, rounded to 2 decimal places?",
+    "query": "WITH sale_payments AS (SELECT s.id AS sale_id, s.sale_date, MAX(p.payment_date) AS latest_payment_date FROM sales s JOIN payments_received p ON s.id = p.sale_id GROUP BY 1,2) SELECT ROUND(AVG(latest_payment_date - sale_date), 2) AS avg_days_to_payment FROM sale_payments",
+    "answer": "2.05",
+    "dataset": "car_dealership",
+    "category": "instructions_cte_join",
+    "instructions": "When getting duration between sale and payment date for each sale, get the latest payment for sale by aggregating over the payments_received table first."
+  },
+  {
+    "question": "Return the highest sale price for each make and model of cars that have been sold and are no longer in inventory, ordered by the sale price from highest to lowest. Use the most recent date in the inventory_snapshots table to determine that car's inventory status.",
+    "query": "WITH latest_inventory_status AS (SELECT car_id, is_in_inventory, ROW_NUMBER() OVER(PARTITION BY car_id ORDER BY snapshot_date DESC) AS rn FROM inventory_snapshots) SELECT c.make, c.model, MAX(s.sale_price) AS highest_sale_price FROM cars c JOIN sales s ON c.id = s.car_id JOIN latest_inventory_status lis ON c.id = lis.car_id WHERE lis.is_in_inventory = FALSE AND lis.rn = 1 GROUP BY c.make, c.model ORDER BY highest_sale_price DESC",
+    "answer": "BMW, X5, 63000.00; Tesla, Model 3, 49000.00; Lexus, RX350, 44500.00; Audi, A4, 43500.00; Subaru, Outback, 30000.00; Chevrolet, Equinox, 26800.00; Nissan, Altima, 26500.00; Honda, Civic, 23500.00",
+    "dataset": "car_dealership",
+    "category": "instructions_cte_join",
+    "instructions": "When getting a car's inventory status, always take the latest status from the inventory_snapshots table"
+  },
+  {
+    "question": "Who are the top 5 salespersons by total sales amount? Return their ID, first name, last name and total sales amount.",
+    "query": "WITH salesperson_sales AS (SELECT s.id, s.first_name, s.last_name, SUM(sa.sale_price) AS total_sales FROM salespersons s LEFT JOIN sales sa ON s.id = sa.salesperson_id GROUP BY s.id) SELECT id, first_name, last_name, total_sales FROM salesperson_sales ORDER BY total_sales DESC NULLS LAST LIMIT 5",
+    "answer": "2, Jane, Smith, 278000.00; 1, John, Doe, 215000.00; 6, Sarah, Taylor, 116000.00; 3, Michael, Johnson, 96500.00; 4, Emily, Brown, 79500.00",
+    "dataset": "car_dealership",
+    "category": "instructions_cte_join",
+    "instructions": "To get the total sales amount per salesperson, join the salespersons and sales tables, group by salesperson, and sum the sale_price. Always order results with NULLS last."
+  },
+  {
+    "question": "How many sales did each salesperson make in the past 30 days, inclusive of today's date? Return their ID, first name, last name and number of sales made, ordered from most to least sales.",
+    "query": "WITH recent_sales AS (SELECT sp.id, sp.first_name, sp.last_name, COUNT(s.id) AS num_sales FROM salespersons sp LEFT JOIN sales s ON sp.id = s.salesperson_id WHERE s.sale_date >= CURRENT_DATE - INTERVAL '30 days' GROUP BY sp.id) SELECT id, first_name, last_name, num_sales FROM recent_sales ORDER BY num_sales DESC;WITH recent_sales AS (SELECT sp.id, sp.first_name, sp.last_name, COUNT(s.id) AS num_sales FROM salespersons sp LEFT JOIN sales s ON sp.id = s.salesperson_id AND s.sale_date >= CURRENT_DATE - INTERVAL '30 days' GROUP BY sp.id, sp.first_name, sp.last_name) SELECT id, first_name, last_name, num_sales FROM recent_sales ORDER BY num_sales DESC",
+    "answer": "13 records returned",
+    "dataset": "car_dealership",
+    "category": "instructions_cte_join",
+    "instructions": "To get the number of sales made by each salesperson in the past 30 days, join the salespersons and sales tables and filter for sales in the last 30 days."
+  },
+  {
+    "question": "Return the first name, last name, total sales amount, number of sales, and SR for each salesperson",
+    "query": "SELECT sp.first_name, sp.last_name, COALESCE(SUM(s.sale_price), 0) AS total_sales_amount, COUNT(s.id) AS number_of_sales, RANK() OVER ( ORDER BY COALESCE(SUM(s.sale_price), 0) DESC) AS sr FROM salespersons sp LEFT JOIN sales s ON sp.id = s.salesperson_id GROUP BY sp.id, sp.first_name, sp.last_name;SELECT sp.first_name, sp.last_name, SUM(s.sale_price) AS total_sales_amount, COUNT(*) AS number_of_sales, RANK() OVER ( ORDER BY SUM(s.sale_price) DESC) AS sr FROM salespersons sp JOIN sales s ON sp.id = s.salesperson_id GROUP BY sp.id, sp.first_name, sp.last_name;",
+    "answer": "Jane, Smith, 278000.00, 6, 1; John, Doe, 215000.00, 5, 2; Sarah, Taylor, 116000.00, 3, 3; Michael, Johnson, 96500.00, 3, 4; Emily, Brown, 79500.00, 3, 5; Daniel, Anderson, 66900.00, 2, 6",
+    "dataset": "car_dealership",
+    "category": "instructions_cte_window",
+    "instructions": "SR = sales rank of each salesperson ordered by their total sales amount descending"
+  },
+  {
+    "question": "What is the total payments received per month? Also calculate the MoM change for each month.",
+    "query": "WITH monthly_totals AS (SELECT DATE_TRUNC('month', payment_date) AS dt, SUM(payment_amount) AS total_payments FROM payments_received GROUP BY dt), monthly_range AS (SELECT generate_series(DATE_TRUNC('month', MIN(payment_date)), DATE_TRUNC('month', MAX(payment_date)), '1 month'::interval) AS dt FROM payments_received), monthly_totals_with_zero AS (SELECT mr.dt, COALESCE(mt.total_payments, 0) AS total_payments FROM monthly_range mr LEFT JOIN monthly_totals mt ON mr.dt = mt.dt) SELECT m.dt::DATE AS MONTH, m.total_payments, m.total_payments - lag(m.total_payments, 1) OVER (ORDER BY dt) AS mom_change FROM monthly_totals_with_zero m ORDER BY m.dt;WITH monthly_payments AS (SELECT DATE_TRUNC('month', pr.payment_date) AS MONTH, SUM(pr.payment_amount) AS total_payments FROM payments_received pr GROUP BY MONTH ORDER BY MONTH), monthly_range AS (SELECT generate_series(DATE_TRUNC('month', MIN(pr.payment_date)), DATE_TRUNC('month', MAX(pr.payment_date)), '1 month'::interval) AS MONTH FROM payments_received pr), monthly_payments_with_zeros AS (SELECT mr.month, COALESCE(mp.total_payments, 0) AS total_payments FROM monthly_range mr LEFT JOIN monthly_payments mp ON mr.month = mp.month) SELECT mp.month, mp.total_payments, mp.total_payments - lag(mp.total_payments, 1) OVER (ORDER BY mp.month) AS mom_change FROM monthly_payments_with_zeros mp ORDER BY mp.month;WITH monthly_totals AS (SELECT TO_CHAR(DATE_TRUNC('month', payment_date), 'YYYY-MM') AS dt, SUM(payment_amount) AS total_payments FROM payments_received GROUP BY dt), monthly_range AS (SELECT TO_CHAR(generate_series(DATE_TRUNC('month', MIN(payment_date)), DATE_TRUNC('month', MAX(payment_date)), '1 month'::interval), 'YYYY-MM') AS dt FROM payments_received), monthly_totals_with_zero AS (SELECT mr.dt, COALESCE(mt.total_payments, 0) AS total_payments FROM monthly_range mr LEFT JOIN monthly_totals mt ON mr.dt = mt.dt) SELECT m.dt AS MONTH, m.total_payments, m.total_payments - lag(m.total_payments, 1) OVER (ORDER BY dt) AS mom_change FROM monthly_totals_with_zero m ORDER BY m.dt;WITH months AS (SELECT generate_series( (SELECT date_trunc('month', MIN(payment_date)) FROM payments_received), (SELECT date_trunc('month', MAX(payment_date)) FROM payments_received), interval '1 month') AS MONTH), payments_agg AS (SELECT date_trunc('month', payment_date) AS MONTH, SUM(payment_amount) AS total_payments FROM payments_received GROUP BY 1) SELECT m.month, COALESCE(p.total_payments, 0) AS total_payments, COALESCE(COALESCE(p.total_payments, 0) - LAG(COALESCE(p.total_payments, 0)) OVER ( ORDER BY m.month), 0) AS mom_change FROM months m LEFT JOIN payments_agg p ON m.month = p.month ORDER BY m.month;",
+    "answer": "28 records returned",
+    "dataset": "car_dealership",
+    "category": "instructions_cte_window",
+    "instructions": "MoM change = (current month value - prev month value). Return all months in your answer, including those where there were no payments."
+  },
+  {
+    "question": "What are the PMSPS and PMSR in the last 6 months excluding the current month, for salespersons hired between 2022 and 2023 (both inclusive)? Return all months in your answer, including those where metrics are 0. Order by month ascending.",
+    "query": "WITH date_range AS (SELECT generate_series(date_trunc('month', CURRENT_DATE - interval '6 months'), date_trunc('month', CURRENT_DATE - interval '1 month'), '1 month')::DATE AS month_start), sales_metrics AS (SELECT date_trunc('month', s.sale_date) AS sale_month, COUNT(s.id) AS PMSPS, SUM(s.sale_price) AS PMSR FROM sales s JOIN salespersons sp ON s.salesperson_id = sp.id WHERE EXTRACT(YEAR FROM sp.hire_date) BETWEEN 2022 AND 2023 AND s.sale_date >= date_trunc('month', CURRENT_DATE - interval '6 months') AND s.sale_date < date_trunc('month', CURRENT_DATE) GROUP BY sale_month) SELECT dr.month_start, COALESCE(sm.PMSPS, 0) AS PMSPS, COALESCE(sm.PMSR, 0) AS PMSR FROM date_range dr LEFT JOIN sales_metrics sm ON dr.month_start = sm.sale_month ORDER BY dr.month_start ASC;WITH month_series AS (SELECT generate_series(date_trunc('month', CURRENT_DATE) - interval '6 months', date_trunc('month', CURRENT_DATE) - interval '1 month', interval '1 month') AS MONTH), aggregated AS (SELECT date_trunc('month', s.sale_date) AS MONTH, count(s.id) AS PMSPS, sum(s.sale_price) AS PMSR FROM sales s JOIN salespersons sp ON sp.id = s.salesperson_id WHERE s.sale_date >= date_trunc('month', CURRENT_DATE) - interval '6 months' AND s.sale_date < date_trunc('month', CURRENT_DATE) AND sp.hire_date BETWEEN '2022-01-01' AND '2023-12-31' GROUP BY date_trunc('month', s.sale_date)) SELECT ms.month, COALESCE(a.PMSPS, 0) AS PMSPS, COALESCE(a.PMSR, 0) AS PMSR FROM month_series ms LEFT JOIN aggregated a ON ms.month = a.month ORDER BY ms.month ASC;",
+    "answer": "2025-01-01 00:00:00+00:00, 0, 0; 2025-02-01 00:00:00+00:00, 0, 0; 2025-03-01 00:00:00+00:00, 0, 0; 2025-04-01 00:00:00+00:00, 3, 142000.00; 2025-05-01 00:00:00+00:00, 0, 0; 2025-06-01 00:00:00+00:00, 4, 166000.00",
+    "dataset": "car_dealership",
+    "category": "instructions_date_join",
+    "instructions": "PMSPS = per month salesperson sales count. PMSR = per month sales revenue in dollars. Truncate date to month for aggregation."
+  },
+  {
+    "question": "How many Toyota cars were sold in the last 30 days inclusive of today? Return the number of sales and total revenue.",
+    "query": "SELECT COUNT(s.id) AS num_sales, SUM(s.sale_price) AS total_revenue FROM sales s JOIN cars c ON s.car_id = c.id WHERE c.make = 'Toyota' AND s.sale_date BETWEEN CURRENT_DATE - INTERVAL '30 days' AND CURRENT_DATE",
+    "answer": "0",
+    "dataset": "car_dealership",
+    "category": "instructions_date_join",
+    "instructions": "Last 30 days = CURRENT_DATE - INTERVAL '30 days' to CURRENT_DATE. Always join sales with cars before using the sales table."
+  },
+  {
+    "question": "For sales with sale price over $30,000, how many payments were received in total and on weekends in each of the last 8 calendar weeks (excluding the current week)? Return the week (as a date), total payments received, and weekend payments received in ascending order.",
+    "query": "SELECT DATE_TRUNC('week', p.payment_date) AS WEEK, COUNT(p.id) AS total_payments, COUNT(CASE WHEN EXTRACT(dow FROM p.payment_date) IN (0, 6) THEN 1 END) AS weekend_payments FROM payments_received p JOIN sales s ON p.sale_id = s.id WHERE s.sale_price > 30000 AND p.payment_date >= DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '8 weeks' AND p.payment_date < DATE_TRUNC('week', CURRENT_DATE) GROUP BY WEEK ORDER BY WEEK;SELECT date_trunc('week', pr.payment_date)::date AS WEEK, COUNT(*) AS total_payments_received, SUM( CASE WHEN EXTRACT( DOW FROM pr.payment_date )::int IN (0, 6) THEN 1 ELSE 0 END ) AS weekend_payments_received FROM payments_received pr JOIN sales s ON s.id = pr.sale_id WHERE s.sale_price > 30000 AND pr.payment_date >= date_trunc('week', CURRENT_DATE) - interval '8 weeks' AND pr.payment_date < date_trunc('week', CURRENT_DATE) GROUP BY WEEK ORDER BY WEEK ASC;",
+    "answer": "2025-06-09, 1, 1; 2025-06-16, 4, 1",
+    "dataset": "car_dealership",
+    "category": "instructions_date_join",
+    "instructions": "Weekend days are Saturday (6) and Sunday (0). Truncate date to week for aggregation."
+  },
+  {
+    "question": "What is the make, model and sale price of the car with the highest sale price that was sold on the same day it went out of inventory?",
+    "query": "SELECT c.make, c.model, s.sale_price FROM cars c JOIN sales s ON c.id = s.car_id JOIN inventory_snapshots i ON c.id = i.car_id AND DATE_TRUNC('day', s.sale_date) = DATE_TRUNC('day', i.snapshot_date) WHERE i.is_in_inventory = FALSE ORDER BY s.sale_price DESC LIMIT 1",
+    "answer": "BMW, X5, 63000.00",
+    "dataset": "car_dealership",
+    "category": "instructions_date_join",
+    "instructions": "If inventory snapshots and sales from the same day are to be joined, join on the truncated date fields eg FROM inventory_snapshots i JOIN sales s ON DATE_TRUNC('day', i.snapshot_date) = DATE_TRUNC('day', s.sale_date)."
+  },
+  {
+    "question": "What are the details and average sale price for cars that have 'Ford' in their make name or 'Mustang' in the model name? Return make, model, year, color, vin_number and avg_sale_price.",
+    "query": "SELECT c.make, c.model, c.year, c.color, c.vin_number, AVG(s.sale_price) AS avg_sale_price FROM cars c JOIN sales s ON c.id = s.car_id WHERE LOWER(c.make) LIKE '%ford%' OR LOWER(c.model) LIKE '%mustang%' GROUP BY c.make, c.model, c.year, c.color, c.vin_number",
+    "answer": "Ford, Mustang, 2023, blue, 1FA6P8TH4M5100001, 46700.000000000000",
+    "dataset": "car_dealership",
+    "category": "instructions_string_matching",
+    "instructions": "When using car makes, model names, engine_type and vin_number, match case-insensitively and allow partial matches using LIKE with wildcards."
+  },
+  {
+    "question": "How many sales were made for each car model that has 'M5' in its VIN number? Return the make, model and number of sales.",
+    "query": "SELECT c.make, c.model, COUNT(s.id) AS num_sales FROM cars c LEFT JOIN sales s ON c.id = s.car_id WHERE LOWER(c.vin_number) LIKE '%m5%' GROUP BY c.make, c.model",
+    "answer": "Ford, Mustang, 5",
+    "dataset": "car_dealership",
+    "category": "instructions_string_matching",
+    "instructions": "When using car makes, model names, engine_type and vin_number, match case-insensitively and allow partial matches using LIKE with wildcards."
+  },
+  {
+    "question": "What is the TSC in the past 7 days, inclusive of today?",
+    "query": "SELECT COUNT(id) AS TSC FROM sales WHERE sale_date BETWEEN CURRENT_DATE - INTERVAL '6 days' AND CURRENT_DATE",
+    "answer": "0",
+    "dataset": "car_dealership",
+    "category": "keywords_aggregate",
+    "instructions": "TSC = Total Sales Count."
+  },
+  {
+    "question": "What is the ASP for sales made in the first quarter of 2023?",
+    "query": "SELECT AVG(sale_price) AS ASP FROM sales WHERE sale_date >= '2023-01-01' AND sale_date <= '2023-03-31'",
+    "answer": "33100.000000000000",
+    "dataset": "car_dealership",
+    "category": "keywords_aggregate",
+    "instructions": "ASP = Average Sale Price in the first quarter of 2023."
+  },
+  {
+    "question": "Who are the top 3 salespersons by ASP? Return their first name, last name and ASP.",
+    "query": "SELECT salespersons.first_name, salespersons.last_name, AVG(sales.sale_price) AS ASP FROM sales JOIN salespersons ON sales.salesperson_id = salespersons.id GROUP BY salespersons.first_name, salespersons.last_name ORDER BY ASP DESC NULLS LAST LIMIT 3",
+    "answer": "Jane, Smith, 46333.333333333333; John, Doe, 43000.000000000000; Sarah, Taylor, 38666.666666666667",
+    "dataset": "car_dealership",
+    "category": "keywords_ratio",
+    "instructions": "ASP (average selling price) = total sales amount / number of sales"
+  },
+  {
+    "question": "What is the GPM for all car sales in 2023?",
+    "query": "SELECT (SUM(sale_price) - SUM(cars.cost)) / SUM(cars.cost) * 100 AS gpm FROM sales JOIN cars ON sales.car_id = cars.id WHERE EXTRACT(YEAR FROM sale_date) = 2023",
+    "answer": "2.70344827586206896600",
+    "dataset": "car_dealership",
+    "category": "keywords_ratio",
+    "instructions": "GPM (gross profit margin) = (total revenue - total cost) / total cost * 100"
+  },
+  {
+    "question": "Which states do doctors who have prescribed biologic drugs reside in? Return the distinct states.",
+    "query": "WITH doctor_treatment AS (SELECT d.doc_id, d.loc_state FROM doctors d JOIN treatments t ON d.doc_id = t.doc_id JOIN drugs dr ON t.drug_id = dr.drug_id WHERE dr.drug_type = 'biologic') SELECT DISTINCT loc_state FROM doctor_treatment",
+    "answer": "CA; CT; MA; MD; NC; PA",
+    "dataset": "derm_treatment",
+    "category": "instructions_cte_join",
+    "instructions": "To identify doctors who have prescribed a certain drug type and their respective states, first join doctors with treatments on doc_id, then filter by the drug type."
+  },
+  {
+    "question": "What is the average weight in kg of patients treated with the drug named 'Drugalin'? Return the average weight.",
+    "query": "WITH patient_treatment AS (SELECT p.patient_id, p.weight_kg FROM patients p JOIN treatments t ON p.patient_id = t.patient_id WHERE t.drug_id = (SELECT drug_id FROM drugs WHERE drug_name = 'Drugalin')) SELECT AVG(weight_kg) FROM patient_treatment",
+    "answer": "73.33333333333333",
+    "dataset": "derm_treatment",
+    "category": "instructions_cte_join",
+    "instructions": "To find the average weight of patients treated with a specific drug, first join patients with treatments on patient_id, then filter by the drug name."
+  },
+  {
+    "question": "I want the adverse events that have been reported for treatments involving topical drugs. Give me the description, treatment id, drug id and name.",
+    "query": "SELECT a.description, a.treatment_id, d.drug_id, d.drug_name FROM adverse_events a JOIN treatments t ON a.treatment_id = t.treatment_id JOIN drugs d ON t.drug_id = d.drug_id WHERE d.drug_type = 'topical'",
+    "answer": "Diarrhea, 9, 3, Topizol",
+    "dataset": "derm_treatment",
+    "category": "instructions_cte_join",
+    "instructions": "To get adverse events reported for treatments involving certain drugs, first join treatments with adverse_events on treatment_id, then join with drugs on drug_id to filter on the specific drug(s)."
+  },
+  {
+    "question": "How many patients have been diagnosed with 'Psoriasis vulgaris' and treated with a biologic drug? Return the distinct count of patients.",
+    "query": "WITH patient_diagnosis_treatment AS (SELECT p.patient_id FROM patients p JOIN treatments t ON p.patient_id = t.patient_id JOIN diagnoses d ON t.diag_id = d.diag_id JOIN drugs dr ON t.drug_id = dr.drug_id WHERE d.diag_name = 'Psoriasis vulgaris' AND dr.drug_type = 'biologic') SELECT COUNT(DISTINCT patient_id) FROM patient_diagnosis_treatment",
+    "answer": "3",
+    "dataset": "derm_treatment",
+    "category": "instructions_cte_join",
+    "instructions": "To find the number of patients who have been diagnosed with a specific type of psoriasis and treated with a biologic drug, first join patients with treatments on patient_id, then join with diagnoses on diag_id, filtering by diagnosis and drug type."
+  },
+  {
+    "question": "What is the NPI for each year? Return the year, number of new patients, and NPI",
+    "query": "WITH FirstTreatment AS (SELECT p.patient_id, MIN(t.start_dt) AS first_treatment_date FROM patients p JOIN treatments t ON p.patient_id = t.patient_id GROUP BY p.patient_id), NewPatientsPerYear AS (SELECT EXTRACT(YEAR FROM first_treatment_date) AS YEAR, COUNT(patient_id) AS new_patients FROM FirstTreatment GROUP BY EXTRACT(YEAR FROM first_treatment_date)), NPI AS (SELECT YEAR, new_patients, new_patients - LAG(new_patients, 1) OVER (ORDER BY YEAR) AS npi FROM NewPatientsPerYear) SELECT YEAR, new_patients, npi FROM NPI ORDER BY YEAR",
+    "answer": "2022, 6; 2023, 1, -5; 2024, 1, 0; 2025, 1, 0",
+    "dataset": "derm_treatment",
+    "category": "instructions_cte_window",
+    "instructions": "NPI (new patients increase) = the increase in number of new patients compared to the previous year. New patients are defined as patients starting their first treatment and require joining the patients table with the earliest record of each patient from the treatment table on patient_id"
+  },
+  {
+    "question": "Return each doctor's doc_id, specialty, number of distinct drugs prescribed, and SDR",
+    "query": "SELECT doc_id, specialty, num_drugs, RANK() OVER (PARTITION BY specialty ORDER BY num_drugs DESC) AS SDR FROM (SELECT d.doc_id, d.specialty, COUNT(DISTINCT t.drug_id) AS num_drugs FROM doctors d LEFT JOIN treatments t ON d.doc_id = t.doc_id GROUP BY d.doc_id, d.specialty) AS sub;WITH doc_drug_counts AS (SELECT d.doc_id, d.specialty, COUNT(DISTINCT t.drug_id) AS distinct_drugs FROM doctors d JOIN treatments t ON d.doc_id = t.doc_id GROUP BY d.doc_id, d.specialty) SELECT doc_id, specialty, distinct_drugs AS number_of_distinct_drugs_prescribed, RANK() OVER (PARTITION BY specialty ORDER BY distinct_drugs DESC) AS SDR FROM doc_drug_counts;",
+    "answer": "1, dermatology, 4, 1; 4, dermatology, 3, 2; 7, dermatology, 3, 2; 3, general, 3, 1; 2, immunology, 4, 1; 5, immunology, 4, 1; 6, oncology, 3, 1",
+    "dataset": "derm_treatment",
+    "category": "instructions_cte_window",
+    "instructions": "SDR = a doctor's rank within their specialty by number of distinct drugs prescribed. Doctors prescribing more drugs will have a higher rank"
+  },
+  {
+    "question": "How many treatments did the patient Alice have in the last 6 months, not including the current month?",
+    "query": "SELECT COUNT(t.treatment_id) FROM treatments t JOIN patients p ON t.patient_id = p.patient_id WHERE p.first_name = 'Alice' AND t.start_dt BETWEEN DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '6 months' AND DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 day'",
+    "answer": "2",
+    "dataset": "derm_treatment",
+    "category": "instructions_date_join",
+    "instructions": "Last 6 months = DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '6 months' to DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 day'. Always join treatments with patients before using the treatments table. If not mentioned, the patient name provided is the first name."
+  },
+  {
+    "question": "What are the PMPD and PMTC for each of the last 12 months, not including the current month",
+    "query": "SELECT DATE_TRUNC('month', t.start_dt) AS MONTH, COUNT(DISTINCT d.diag_id) AS patient_count, COUNT(DISTINCT t.treatment_id) AS treatment_count FROM treatments t JOIN diagnoses d ON t.diag_id = d.diag_id WHERE t.start_dt >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '12 months' AND t.start_dt < DATE_TRUNC('month', CURRENT_DATE) GROUP BY MONTH",
+    "answer": "2024-12-01 00:00:00+00:00, 1, 1; 2025-01-01 00:00:00+00:00, 2, 2; 2025-02-01 00:00:00+00:00, 1, 1; 2025-03-01 00:00:00+00:00, 1, 1; 2025-04-01 00:00:00+00:00, 1, 1; 2025-05-01 00:00:00+00:00, 1, 1; 2025-06-01 00:00:00+00:00, 2, 2",
+    "dataset": "derm_treatment",
+    "category": "instructions_date_join",
+    "instructions": "PMPD = per month patient diagnoses. PMTC = per month treatment count. Truncate start_dt to month for aggregation."
+  },
+  {
+    "question": "How many distinct patients had treatments in each of the last 3 months, not including the current month? Out of these, how many had treatments with biologic drugs? Return the month, patient count, and biologic treatment count.",
+    "query": "SELECT DATE_TRUNC('month', t.start_dt) AS MONTH, COUNT(DISTINCT t.patient_id) AS patient_count, COUNT(DISTINCT CASE WHEN d.drug_type = 'biologic' THEN t.patient_id ELSE NULL END) AS biologic_count FROM treatments t JOIN drugs d ON t.drug_id = d.drug_id WHERE t.start_dt >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '3 months' AND t.start_dt < DATE_TRUNC('month', CURRENT_DATE) GROUP BY MONTH;SELECT DATE_TRUNC('month', t.start_dt)::date AS month, COUNT(DISTINCT t.patient_id) AS patient_count, COUNT(DISTINCT CASE WHEN d.drug_type = 'biologic' THEN t.patient_id ELSE NULL END) AS biologic_count FROM treatments t JOIN drugs d ON t.drug_id = d.drug_id WHERE t.start_dt >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '3 months' AND t.start_dt < DATE_TRUNC('month', CURRENT_DATE) GROUP BY month;SELECT TO_CHAR(DATE_TRUNC('month', t.start_dt), 'YYYY-MM') AS month, COUNT(DISTINCT t.patient_id) AS patient_count, COUNT(DISTINCT CASE WHEN d.drug_type = 'biologic' THEN t.patient_id ELSE NULL END) AS biologic_count FROM treatments t JOIN drugs d ON t.drug_id = d.drug_id WHERE t.start_dt >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '3 months' AND t.start_dt < DATE_TRUNC('month', CURRENT_DATE) GROUP BY month;",
+    "answer": "2025-04, 1, 0; 2025-05, 1, 0; 2025-06, 2, 1",
+    "dataset": "derm_treatment",
+    "category": "instructions_date_join",
+    "instructions": "Biologic drugs have drug_type = 'biologic'. Truncate start_dt to month for aggregation."
+  },
+  {
+    "question": "Which drug had the highest number of adverse events reported within the same month as the treatment start date (adverse event or treatment can be earlier than the other)? Return the number of adverse events along with the drug's id and name.",
+    "query": "WITH adverse_events_per_drug AS (SELECT d.drug_id, COUNT(ae.id) AS num_events FROM adverse_events ae JOIN treatments t ON ae.treatment_id = t.treatment_id AND DATE_TRUNC('month', ae.reported_dt) = DATE_TRUNC('month', t.start_dt) JOIN drugs d ON t.drug_id = d.drug_id GROUP BY d.drug_id) SELECT ae.drug_id, d.drug_name, ae.num_events FROM adverse_events_per_drug ae JOIN drugs d USING(drug_id) ORDER BY ae.num_events DESC LIMIT 1",
+    "answer": "1, Drugalin, 2",
+    "dataset": "derm_treatment",
+    "category": "instructions_date_join",
+    "instructions": "If events from 2 different tables from the same interval are to be joined, join on the respective truncated date fields eg `FROM t1 JOIN t2 ON DATE_TRUNC('<interval>', t1.date)=DATE_TRUNC('<interval>', t2.date)."
+  },
+  {
+    "question": "How many patients have a Gmail or Yahoo email address?",
+    "query": "SELECT COUNT(*) FROM patients WHERE email LIKE '%@gmail.com' OR email LIKE '%@yahoo.com'",
+    "answer": "0",
+    "dataset": "derm_treatment",
+    "category": "instructions_string_matching",
+    "instructions": "Patients with gmail or yahoo email addresses"
+  },
+  {
+    "question": "Return the first name, last name and specialty of doctors whose first name starts with 'J' or last name contains 'son', case-insensitive.",
+    "query": "SELECT first_name, last_name, specialty FROM doctors WHERE first_name ILIKE 'J%' OR last_name ILIKE '%son%'",
+    "answer": "John, Doe, dermatology; Jane, Smith, immunology; David, Johnson, general; Sarah, Wilson, oncology; Olivia, Anderson, dermatology",
+    "dataset": "derm_treatment",
+    "category": "instructions_string_matching",
+    "instructions": "Doctors whose first name starts with 'J' or last name contains 'son', case-insensitive"
+  },
+  {
+    "question": "What is the PIC for female patients?",
+    "query": "SELECT COUNT(patient_id) AS pic FROM patients WHERE gender = 'Female' AND ins_type = 'private'",
+    "answer": "3",
+    "dataset": "derm_treatment",
+    "category": "keywords_aggregate",
+    "instructions": "PIC = private insured patient count"
+  },
+  {
+    "question": "What is the CAW for male patients",
+    "query": "SELECT AVG(weight_kg) AS caw FROM patients WHERE gender = 'Male'",
+    "answer": "83.0",
+    "dataset": "derm_treatment",
+    "category": "keywords_aggregate",
+    "instructions": "CAW = cohort average weight in kilograms"
+  },
+  {
+    "question": "Calculate the average DDD for each drug. Return the drug name and average DDD value.",
+    "query": "SELECT d.drug_name, AVG(t.tot_drug_amt / NULLIF((t.end_dt - t.start_dt), 0)) AS ddd FROM treatments t JOIN drugs d ON t.drug_id = d.drug_id WHERE t.end_dt IS NOT NULL GROUP BY d.drug_name",
+    "answer": "Topicort, 3.9669722542650719; Medicol, 1.24590163934426229508; Drugalin, 1.39426787108285937184; Biologic-X, 0.44776119402985074627; Smallazine, 0.99180327868852459017; Topizol, 1.9781420765027323",
+    "dataset": "derm_treatment",
+    "category": "keywords_ratio",
+    "instructions": "DDD (defined daily dose) = total drug amount consumed during one treatment / total days of treatment (end - start date in days), where end date is not null"
+  },
+  {
+    "question": "What is the overall D7D100PIR across all treatments? Return the percentage value.",
+    "query": "SELECT (AVG(day100_pasi_score) - AVG(day7_pasi_score)) / AVG(day7_pasi_score) * 100 AS d7d100pir FROM outcomes WHERE day7_pasi_score IS NOT NULL AND day100_pasi_score IS NOT NULL",
+    "answer": "-74.15043909889270721600",
+    "dataset": "derm_treatment",
+    "category": "keywords_ratio",
+    "instructions": "D7D100PIR (day 7 to day 100 PASI improvement rate) = (avg PASI score on day 100 - avg PASI score on day 7) / avg PASI score on day 7 * 100. This should only include patients who have non-null PASI scores for both timepoints."
+  },
+  {
+    "question": "What is the total number of wallet transactions sent by each user that is not a merchant? Return the user ID and total transaction count.",
+    "query": "WITH user_transactions AS (SELECT u.uid, t.txid FROM consumer_div.users u JOIN consumer_div.wallet_transactions_daily t ON u.uid = t.sender_id WHERE t.sender_type = 0) SELECT UID, COUNT(txid) AS total_transactions FROM user_transactions GROUP BY UID",
+    "answer": "1, 4; 2, 7; 4, 3; 5, 1; 8, 2; 9, 4",
+    "dataset": "ewallet",
+    "category": "instructions_cte_join",
+    "instructions": "To get the total number of transactions per user, join the users and wallet_transactions_daily tables in a CTE, then aggregate by user_id and count the number of transactions"
+  },
+  {
+    "question": "What is the total transaction amount for each coupon offered by merchant with ID 1? Return the coupon ID and total amount transacted with it.",
+    "query": "WITH merchant_coupon_usage AS (SELECT c.cid, t.amount FROM consumer_div.coupons c JOIN consumer_div.wallet_transactions_daily t ON c.cid = t.coupon_id WHERE c.merchant_id = 1) SELECT cid, SUM(amount) AS total_discount FROM merchant_coupon_usage GROUP BY cid",
+    "answer": "1, 36.00",
+    "dataset": "ewallet",
+    "category": "instructions_cte_join",
+    "instructions": "To get coupon usage, join the coupons and wallet_transactions_daily on coupon_id "
+  },
+  {
+    "question": "What is the total session duration in seconds for each user between 2023-06-01 inclusive and 2023-06-08 exclusive? Return the user ID and their total duration as an integer sorted by total duration with the longest duration first",
+    "query": "WITH user_session_duration AS (SELECT u.uid, s.session_start_ts, s.session_end_ts FROM consumer_div.users u JOIN consumer_div.user_sessions s ON u.uid = s.user_id WHERE s.session_start_ts >= '2023-06-01' AND s.session_end_ts < '2023-06-08') SELECT UID, CAST(SUM(EXTRACT(EPOCH FROM session_end_ts) - EXTRACT(EPOCH FROM session_start_ts)) AS INT) AS total_duration FROM user_session_duration GROUP BY UID ORDER BY total_duration DESC;WITH session_durations AS (SELECT u.uid AS user_id, EXTRACT(EPOCH FROM (s.session_end_ts - s.session_start_ts)) AS duration_seconds FROM consumer_div.users u JOIN consumer_div.user_sessions s ON u.uid = s.user_id WHERE s.session_start_ts >= '2023-06-01' AND s.session_start_ts < '2023-06-08') SELECT user_id, CAST(SUM(duration_seconds) AS INTEGER) AS total_duration FROM session_durations GROUP BY user_id ORDER BY total_duration DESC;",
+    "answer": "1, 5666; 6, 4205; 8, 3640; 2, 3224; 4, 2736; 5, 2098; 10, 1843; 9, 1797; 7, 1518; 3, 1370",
+    "dataset": "ewallet",
+    "category": "instructions_cte_join",
+    "instructions": "To analyze user engagement, join the users and user_sessions tables in a CTE, then aggregate to calculate total session duration per user for a given date range. Remember to convert your answer into seconds, using EPOCH function"
+  },
+  {
+    "question": "What is the marketing opt-in preference for each user? Return the user ID and boolean opt-in value",
+    "query": "WITH user_latest_setting AS (SELECT u.uid, s.marketing_opt_in, s.created_at, ROW_NUMBER() OVER (PARTITION BY u.uid ORDER BY s.created_at DESC) AS rn FROM consumer_div.users u JOIN consumer_div.user_setting_snapshot s ON u.uid = s.user_id) SELECT UID, marketing_opt_in FROM user_latest_setting WHERE rn = 1",
+    "answer": "1, False; 2, True; 3, False; 4, True; 5, False; 6, True; 7, True; 8, False; 9, True; 10, True",
+    "dataset": "ewallet",
+    "category": "instructions_cte_join",
+    "instructions": "To get any user's settings, only select the latest snapshot of user_setting_snapshot for each user"
+  },
+  {
+    "question": "What is the LUB for each user.",
+    "query": "WITH user_balances AS (SELECT user_id, balance, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY updated_at DESC) AS rn FROM consumer_div.wallet_user_balance_daily) SELECT user_id, balance FROM user_balances WHERE rn = 1",
+    "answer": "1, 2733.92; 2, 155.24; 3, 2775.25; 4, 2500.00; 5, 155.99; 6, 29.95; 7, 172.98; 8, 0.00; 9, 125.00; 10, 219.98",
+    "dataset": "ewallet",
+    "category": "instructions_cte_window",
+    "instructions": "LUB = Latest User Balance, which is the most recent balance for each user"
+  },
+  {
+    "question": "What is the MRR for each merchant? Return the merchant name, category, revenue amount, and revenue rank.",
+    "query": "WITH merchant_revenue AS (SELECT m.mid, m.name, m.category AS merchant_category, SUM(w.amount) AS total_revenue FROM consumer_div.merchants m INNER JOIN consumer_div.wallet_transactions_daily w ON m.mid = w.receiver_id AND w.receiver_type = 1 WHERE w.status = 'success' GROUP BY m.mid, m.name, m.category, m.category) SELECT *, RANK() OVER (ORDER BY total_revenue DESC) AS mrr FROM merchant_revenue",
+    "answer": "1, TechMart, retail (hardware), 435.98, 1; 9, BeautyTrending, Retail, 125.00, 2; 3, UrbanDining, Food & Dining, 109.99, 3; 2, FitLifeGear, retail (hardware), 72.98, 4; 5, HandyCraft, Retail, 55.99, 5; 10, GameRush, Retail, 29.99, 6; 7, ZenHomeGoods, Retail, 17.99, 7",
+    "dataset": "ewallet",
+    "category": "instructions_cte_window",
+    "instructions": "MRR = Merchant Revenue Rank, which ranks merchants based on amounts from successfully received transactions only. Filter receiver_type=1 in consumer_div.wallet_transactions_daily for merchants. Merchant with rank 1 has the highest revenue."
+  },
+  {
+    "question": "For users in the US and Canada, how many total notifications were sent in each of the last 3 weeks excluding the current week? How many of those were sent on weekends?",
+    "query": "SELECT DATE_TRUNC('week', n.created_at) AS WEEK, COUNT(*) AS total_notifications, COUNT(CASE WHEN EXTRACT(dow FROM n.created_at) IN (0, 6) THEN 1 END) AS weekend_notifications FROM consumer_div.notifications n JOIN consumer_div.users u ON n.user_id = u.uid WHERE u.country IN ('US', 'CA') AND n.created_at >= DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '3 weeks' AND n.created_at < DATE_TRUNC('week', CURRENT_DATE) GROUP BY WEEK",
+    "answer": "2025-06-09 00:00:00, 1, 0; 2025-06-16 00:00:00, 2, 0",
+    "dataset": "ewallet",
+    "category": "instructions_date_join",
+    "instructions": "Weekends are Saturdays and Sundays. Truncate created_at to week for aggregation."
+  },
+  {
+    "question": "How many wallet transactions were made by users from the US in the last 7 days inclusive of today? Return the number of transactions and total transaction amount.",
+    "query": "SELECT COUNT(*) AS num_transactions, SUM(amount) AS total_amount FROM consumer_div.wallet_transactions_daily t JOIN consumer_div.users u ON t.sender_id = u.uid WHERE u.country = 'US' AND t.created_at >= CURRENT_DATE - INTERVAL '7 days' AND t.created_at < CURRENT_DATE + INTERVAL '1 day'",
+    "answer": "0",
+    "dataset": "ewallet",
+    "category": "instructions_date_join",
+    "instructions": "Last 7 days = CURRENT_DATE - INTERVAL '7 days' to CURRENT_DATE. Always join wallet_transactions_daily with users before using the wallet_transactions_daily table."
+  },
+  {
+    "question": "Which merchant created the highest number of coupons within the same month that the merchant was created (coupon or merchant can be created earlier than the other)? Return the number of coupons along with the merchant's id and name.",
+    "query": "WITH coupons_per_merchant AS (SELECT m.mid, COUNT(c.cid) AS num_coupons FROM consumer_div.coupons c JOIN consumer_div.merchants m ON m.mid = c.merchant_id AND DATE_TRUNC('month', c.created_at) = DATE_TRUNC('month', m.created_at) GROUP BY m.mid) SELECT coupons_per_merchant.mid, m.name, coupons_per_merchant.num_coupons FROM coupons_per_merchant JOIN consumer_div.merchants m USING(mid) ORDER BY coupons_per_merchant.num_coupons DESC LIMIT 1",
+    "answer": "10, GameRush, 1",
+    "dataset": "ewallet",
+    "category": "instructions_date_join",
+    "instructions": "If events from 2 different tables from the same interval are to be joined, join on the respective truncated date fields eg `FROM t1 JOIN t2 ON DATE_TRUNC('<interval>', t1.date)=DATE_TRUNC('<interval>', t2.date)."
+  },
+  {
+    "question": "What is the PMDAU (Per Month Daily Active Users) for wallet transactions in the last 2 months excluding the current month?",
+    "query": "SELECT DATE_TRUNC('month', t.created_at) AS MONTH, COUNT(DISTINCT t.sender_id) AS active_users FROM consumer_div.wallet_transactions_daily t WHERE t.sender_type = 0 AND t.created_at >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '2 months' AND t.created_at < DATE_TRUNC('month', CURRENT_DATE) GROUP BY MONTH",
+    "answer": "2025-05-01 00:00:00, 1",
+    "dataset": "ewallet",
+    "category": "instructions_date_join",
+    "instructions": "PMDAU (Per Month Daily Active Users) = COUNT(DISTINCT(sender_id) ... WHERE t.sender_type = 0. Truncate created_at to month for aggregation."
+  },
+  {
+    "question": "Which users from the US have unread promotional notifications? Return the username and the total number of unread promotional notifications.",
+    "query": "SELECT u.username, COUNT(n.id) AS total_notifications FROM consumer_div.users u JOIN consumer_div.notifications n ON u.uid = n.user_id WHERE n.type = 'promotion' AND n.status = 'unread' AND LOWER(u.country) = 'us' GROUP BY u.username",
+    "answer": "john_doe, 2",
+    "dataset": "ewallet",
+    "category": "instructions_string_matching",
+    "instructions": "User country should be matched case-insensitively, e.g., LOWER(users.country) = 'us'. Notification type and status should be matched exactly."
+  },
+  {
+    "question": "How many active retail merchants have issued coupons? Return the merchant name and the total number of coupons issued.",
+    "query": "SELECT m.name, COUNT(c.cid) AS total_coupons FROM consumer_div.merchants m JOIN consumer_div.coupons c ON m.mid = c.merchant_id WHERE m.status = 'active' AND LOWER(m.category) LIKE '%retail%' GROUP BY m.name",
+    "answer": "BeautyTrending, 1; FitLifeGear, 1; GameRush, 1; HandyCraft, 1; TechMart, 1; ZenHomeGoods, 1",
+    "dataset": "ewallet",
+    "category": "instructions_string_matching",
+    "instructions": "Merchant category should be matched case-insensitively with wildcards, e.g., LOWER(merchants.category) LIKE '%...%'."
+  },
+  {
+    "question": "What is the TUC in the past month, inclusive of 1 month ago? Return the total count.",
+    "query": "SELECT COUNT(*) AS TUC FROM consumer_div.user_sessions WHERE session_start_ts >= CURRENT_DATE - INTERVAL '1 month' OR session_end_ts >= CURRENT_DATE - INTERVAL '1 month'",
+    "answer": "6",
+    "dataset": "ewallet",
+    "category": "keywords_aggregate",
+    "instructions": "TUC = Total number of user sessions in the past month"
+  },
+  {
+    "question": "What is the average AMB for user wallets updated in the past week, inclusive of 7 days ago? Return the average balance.",
+    "query": "SELECT AVG(balance) AS AMB FROM consumer_div.wallet_user_balance_daily WHERE updated_at >= CURRENT_DATE - INTERVAL '7 days'",
+    "answer": "None",
+    "dataset": "ewallet",
+    "category": "keywords_aggregate",
+    "instructions": "AMB = average balance per user (for the given time duration)"
+  },
+  {
+    "question": "Calculate the CPUR for each merchant, considering only successful transactions. Return the merchant name and CPUR.",
+    "query": "SELECT m.name, (COUNT(DISTINCT wtd.coupon_id) * 1.0 / NULLIF(COUNT(DISTINCT wtd.txid), 0)) AS CPUR FROM consumer_div.wallet_transactions_daily AS wtd JOIN consumer_div.merchants AS m ON wtd.receiver_id = m.mid WHERE wtd.status = 'success' GROUP BY m.name;",
+    "answer": "BeautyTrending, 0.33333333333333333333; FitLifeGear, 0E-20; GameRush, 1.00000000000000000000; HandyCraft, 0E-20; TechMart, 0.14285714285714285714; UrbanDining, 0.50000000000000000000; ZenHomeGoods, 1.00000000000000000000",
+    "dataset": "ewallet",
+    "category": "keywords_ratio",
+    "instructions": "CPUR (coupon usage rate) = number of distinct coupons used / number of distinct transactions"
+  },
+  {
+    "question": "What was the STR for wallet transactions in the previous month?",
+    "query": "SELECT (SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) * 1.0 / COUNT(*)) AS STR FROM consumer_div.wallet_transactions_daily WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month') AND created_at < DATE_TRUNC('month', CURRENT_DATE)",
+    "answer": "1.00000000000000000000",
+    "dataset": "ewallet",
+    "category": "keywords_ratio",
+    "instructions": "STR (success transaction rate) = number of successful transactions / total number of transactions"
+  }
+]

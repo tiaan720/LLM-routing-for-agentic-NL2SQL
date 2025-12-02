@@ -1,0 +1,44 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start MLflow Server",
+			"type": "shell",
+			"command": "bash",
+			"args": [
+				"-c",
+				"source .venv/bin/activate && mlflow server --host 127.0.0.1 --port 5000 --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --no-serve-artifacts"
+			],
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": [],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			}
+		},
+		{
+			"label": "Stop MLflow Server",
+			"type": "shell",
+			"command": "pkill -f 'mlflow server' && echo 'MLflow server stopped'",
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": [],
+			"args": []
+		}
+		,
+		{
+			"label": "Windows Local Setup",
+			"type": "shell",
+			"command": "powershell.exe",
+			"args": [
+				"-ExecutionPolicy",
+				"Bypass",
+				"-File",
+				".\\bin\\windows_local_setup.ps1"
+			],
+			"group": "build",
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}
